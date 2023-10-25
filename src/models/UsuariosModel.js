@@ -21,7 +21,7 @@ const getUserByEmail = async (email) => {
 const getUsers = async () => {
 	try {
 		// Seleccionar todos los usuarios de la base de datos con todos sus atributos
-		const { data, error: queryError } = await supabase.from("usuarios").select("*");
+		const { data, error: queryError } = await supabase.from("users").select("*");
 
 		//Si hay un error durante la consulta
 		if (queryError) {
@@ -34,12 +34,12 @@ const getUsers = async () => {
 	}
 };
 
-const insertUser = async (email, nombre_usuario, nickname, avatar_id, hashedPassword) => {
+const insertUser = async (name, email, hashedPassword) => {
 	try {
 		// Guardar los datos adicionales del usuario en la tabla 'usuarios'
 		const { data, error: insertError } = await supabase
-			.from("usuarios")
-			.insert([{ email, nickname, nombre_usuario, avatar_id, contrasena: hashedPassword }]);
+			.from("users")
+			.insert([{ name, email, password: hashedPassword }]);
 
 		//Si hay un error durante la insercion de los datos del usuario
 		if (insertError) {
@@ -54,7 +54,7 @@ const insertUser = async (email, nombre_usuario, nickname, avatar_id, hashedPass
 
 const updatePasswordUser = async (to) => {
 	try {
-		const { error: queryError } = await supabase.from("usuarios").update(newData).eq("email", to);
+		const { error: queryError } = await supabase.from("users").update(newData).eq("email", to);
 
 		//Si hay un error durante
 		if (queryError) {
@@ -69,7 +69,7 @@ const searchUser = async (emailToCheck) => {
 	try {
 		//Consulta para verificar si el email existe en la base de datos
 		const { data: userData, error: queryError } = await supabase
-			.from("usuarios")
+			.from("users")
 			.select("*")
 			.eq("email", emailToCheck);
 
@@ -88,7 +88,7 @@ const insertGoogleUser = async (email, given_name, name) => {
 	try {
 		// Guardar los datos del usuario en la tabla 'usuarios'
 		const { data, error: insertError } = await supabase
-			.from("usuarios")
+			.from("users")
 			.insert([{ email: email, nickname: given_name, nombre_usuario: name }]);
 
 		//Si hay un error durante la insercion de los datos del usuario
@@ -102,13 +102,10 @@ const insertGoogleUser = async (email, given_name, name) => {
 	}
 };
 
-const getUserPassword = async (id_usuario) => {
+const getUserPassword = async (user_id) => {
 	try {
 		//Obtener contrasena encriptada del usuario
-		const { data, error } = await supabase
-			.from("usuarios")
-			.select("contrasena")
-			.eq("id_usuario", id_usuario);
+		const { data, error } = await supabase.from("users").select("password").eq("user_id", user_id);
 
 		//Si hay un error
 		if (error) {
@@ -121,12 +118,9 @@ const getUserPassword = async (id_usuario) => {
 	}
 };
 
-const updateUserPassword = async (newData, id_usuario) => {
+const updateUserPassword = async (newData, user_id) => {
 	try {
-		const { data, error } = await supabase
-			.from("usuarios")
-			.update(newData)
-			.eq("id_usuario", id_usuario);
+		const { data, error } = await supabase.from("users").update(newData).eq("user_id", user_id);
 
 		//Si hay un error
 		if (error) {

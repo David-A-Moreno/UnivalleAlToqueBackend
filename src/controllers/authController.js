@@ -32,16 +32,16 @@ const transporter = nodemailer.createTransport({
 async function loginUser(req, res) {
 	try {
 		// Datos obtenidos por el frontend
-		const { email, contrasena } = req.body;
+		const { email, password } = req.body;
 
 		// Realizar la consulta para obtener todos los datos del usuario en la base de datos
-		const usuarioData = await getUserByEmail(email);
+		const userData = await getUserByEmail(email);
 
 		// Verificar el hash de la contraseña
-		const contrasenaHash = usuarioData.contrasena;
+		const passwordHash = userData.password;
 
 		// Comparar el hash almacenado con el hash de la contraseña proporcionada por el usuario
-		const match = await bcrypt.compare(contrasena, contrasenaHash);
+		const match = await bcrypt.compare(password, passwordHash);
 
 		// Si las contraseñas no coinciden, se envía una respuesta de error
 		if (!match) {
@@ -49,17 +49,16 @@ async function loginUser(req, res) {
 		}
 
 		const user = {
-			id_usuario: usuarioData.id_usuario,
-			email: usuarioData.email,
-			nickname: usuarioData.nickname,
+			user_id: userData.user_id,
+			email: userData.email,
 		};
 
-		console.log("user", user, "usuarioData", usuarioData);
-		// Generar token JWT con el id_usuario email y nickname del usuario
+		console.log("user", user, "userData", userData);
+		// Generar token JWT con el user_id email y nickname del usuario
 		const token = jwt.sign(user, secretKey);
 
 		// Enviar el token al frontend con los datos del usuario y un mensaje de confirmacion
-		res.json({ usuarioData, token, message: "Inicio de sesión exitoso" });
+		res.json({ userData, token, message: "Inicio de sesión exitoso" });
 	} catch (error) {
 		console.error("Error al iniciar sesión:", error);
 		res.status(500).json({ error: "Credenciales de inicio de sesión inválidas" });
@@ -100,12 +99,12 @@ async function loginGoogleUser(req, res) {
 
 		//Datos para poner en el token
 		const user = {
-			id_usuario: usuarioData.id_usuario,
+			user_id: usuarioData.user_id,
 			email: usuarioData.email,
 			nickname: usuarioData.nickname,
 		};
 
-		// Generar token JWT con el id_usuario email y nickname del usuario
+		// Generar token JWT con el user_id email y nickname del usuario
 		const token = jwt.sign(user, secretKey);
 
 		// Enviar el token al frontend con los datos del usuario y un mensaje de confirmacion
@@ -151,14 +150,16 @@ async function recoveryPasswordUser(req, res) {
 async function registerUser(req, res) {
 	try {
 		//Datos de registro del usuario recibidos
-		const { email, nombre_usuario, nickname, avatar_id, contrasena } = req.body;
+		const { name, email, password } = req.body;
 
 		// Generar el hash de la contraseña
-		const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 es el número de rondas de hashing
+		const hashedPassword = await bcrypt.hash(password, 10); // 10 es el número de rondas de hashing
 
-		const data = await insertUser(email, nombre_usuario, nickname, avatar_id, hashedPassword);
+		console.log("aaaaa", name, email, password);
 
-		// console.log("data", data);
+		const data = await insertUser(name, email, hashedPassword);
+
+		console.log("data", data);
 
 		//Respuesta
 		res.json("OK");
@@ -169,7 +170,7 @@ async function registerUser(req, res) {
 }
 
 async function currentUser(req, res) {
-	const userId = req.user.id_usuario;
+	const userId = req.user.user_id;
 	const email = req.user.email;
 	const username = req.user.nickname;
 

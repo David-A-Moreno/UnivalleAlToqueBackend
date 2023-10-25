@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
  */
 async function updateUserProfile(req, res) {
 	// Obtener el ID de usuario del token decodificado
-	const id_usuario = req.user.id_usuario;
+	const user_id = req.user.user_id;
 
 	const {
 		nombre_usuario,
@@ -44,7 +44,7 @@ async function updateUserProfile(req, res) {
 	if (nivel) newData["nivel"] = nivel;
 	if (experiencia) newData["experiencia"] = experiencia;
 
-	const data = await getUserPassword(id_usuario);
+	const data = await getUserPassword(user_id);
 	//se obtiene la contraseña del usuario en la bd
 	const contrasena_db = data[0]["contrasena"];
 
@@ -68,7 +68,7 @@ async function updateUserProfile(req, res) {
 		}
 	}
 
-	const updatePassword = await updateUserPassword(newData, id_usuario);
+	const updatePassword = await updateUserPassword(newData, user_id);
 
 	res.status(280).json("Perfil actualizado correctamente");
 	return;

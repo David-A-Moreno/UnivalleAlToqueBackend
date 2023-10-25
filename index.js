@@ -32,9 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 //app.use(cors());
 app.use(configureCORS);
 app.use(authRoutes);
-app.use(userQuizRoutes);
-app.use(userProfileRoutes);
-app.use(uploadRoutes);
+// app.use(userQuizRoutes);
+// app.use(userProfileRoutes);
+// app.use(uploadRoutes);
 
 // Iniciar el servidor
 app.listen(9000, () => {

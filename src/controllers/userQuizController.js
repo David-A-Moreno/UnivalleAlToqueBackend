@@ -12,7 +12,7 @@ async function sendGrade(req, res) {
 			req.body;
 
 		// Obtener el ID de usuario del token decodificado
-		const id_usuario = req.user.id_usuario;
+		const user_id = req.user.user_id;
 
 		const sendNewGrade = await insertCalificacion(
 			respuesta0,
@@ -22,7 +22,7 @@ async function sendGrade(req, res) {
 			respuesta4,
 			calificacion,
 			id_quiz,
-			id_usuario
+			user_id
 		);
 
 		//Respuesta
@@ -35,9 +35,9 @@ async function sendGrade(req, res) {
 //GET para obtener las calificaciones de un usuario
 async function getGrades(req, res) {
 	// Obtener el id del usuario actual
-	const id_usuario = req.user.id_usuario;
+	const user_id = req.user.user_id;
 
-	const getUserGrades = await getCalificacionesUsuario(id_usuario);
+	const getUserGrades = await getCalificacionesUsuario(user_id);
 
 	//Respuesta
 	res.json(getUserGrades);
