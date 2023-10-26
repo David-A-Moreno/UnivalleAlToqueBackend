@@ -27,6 +27,7 @@
 		"stream": "^0.0.2"
 	},
 	"devDependencies": {
+		"jest": "^29.7.0",
 		"nodemon": "^2.0.22"
 	}
 }
