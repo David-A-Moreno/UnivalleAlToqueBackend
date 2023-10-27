@@ -60,7 +60,7 @@ async function loginUser(req, res) {
 		// Enviar el token al frontend con los datos del usuario y un mensaje de confirmacion
 		res.json({ userData, token, message: "Inicio de sesión exitoso" });
 	} catch (error) {
-		console.error("Error al iniciar sesión:", error);
+		//console.error("Error al iniciar sesión:", error);
 		res.status(500).json({ error: "Credenciales de inicio de sesión inválidas" });
 	}
 }
@@ -155,11 +155,9 @@ async function registerUser(req, res) {
 		// Generar el hash de la contraseña
 		const hashedPassword = await bcrypt.hash(password, 10); // 10 es el número de rondas de hashing
 
-		console.log("aaaaa", name, email, password);
 
 		const data = await insertUser(name, email, hashedPassword);
 
-		console.log("data", data);
 
 		//Respuesta
 		res.json("OK");
