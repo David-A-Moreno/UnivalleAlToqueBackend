@@ -34,7 +34,7 @@ const getUsers = async () => {
 	}
 };
 
-const insertUser = async (name, email, hashedPassword) => {
+const insertUser = async (name, last_name, email, hashedPassword) => {
 	try {
 		// Guardar los datos adicionales del usuario en la tabla 'usuarios'
 		const { data, error: insertError } = await supabase
