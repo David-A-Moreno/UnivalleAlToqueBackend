@@ -150,13 +150,13 @@ async function recoveryPasswordUser(req, res) {
 async function registerUser(req, res) {
 	try {
 		//Datos de registro del usuario recibidos
-		const { name, email, password } = req.body;
+		const { name, last_name, email, password } = req.body;
 
 		// Generar el hash de la contraseña
 		const hashedPassword = await bcrypt.hash(password, 10); // 10 es el número de rondas de hashing
 
 
-		const data = await insertUser(name, email, hashedPassword);
+		const data = await insertUser(name, last_name, email, hashedPassword);
 
 
 		//Respuesta
