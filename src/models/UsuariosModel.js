@@ -39,7 +39,7 @@ const insertUser = async (name, last_name, email, hashedPassword) => {
 		// Guardar los datos adicionales del usuario en la tabla 'usuarios'
 		const { data, error: insertError } = await supabase
 			.from("users")
-			.insert([{ name, last_name,  email, password: hashedPassword }]);
+			.insert([{ name, last_name,  email, password: hashedPassword, phone: "+57 000 000 00 00", program: "----------------" }]);
 
 		//Si hay un error durante la insercion de los datos del usuario
 		if (insertError) {
