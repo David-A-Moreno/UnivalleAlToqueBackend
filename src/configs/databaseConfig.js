@@ -1,6 +1,7 @@
 const { createClient } = require("@supabase/supabase-js");
 
 // Credenciales supabase
+console.log(process.env.SUPABASE_KEY)
 const supabaseUrl = "https://hyliboritykvwyixvojj.supabase.co";
 const supabaseKey = process.env.SUPABASE_KEY;
 

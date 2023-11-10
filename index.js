@@ -18,7 +18,7 @@ const express = require("express");
 //IMPORTAR RUTAS
 const authRoutes = require("./src/routes/authRoutes");
 const userQuizRoutes = require("./src/routes/userQuizRoutes");
-const userProfileRoutes = require("./src/routes/userProfileRoutes");
+const updateProfileRoutes = require("./src/routes/updateProfileRoutes");
 const uploadRoutes = require("./src/routes/uploadRoutes");
 const app = express();
 
@@ -33,10 +33,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(configureCORS);
 app.use(authRoutes);
 // app.use(userQuizRoutes);
-// app.use(userProfileRoutes);
+app.use(updateProfileRoutes);
 // app.use(uploadRoutes);
 
 // Iniciar el servidor
 app.listen(9000, () => {
-	console.log("Servidor Express.js en ejecución");
+	console.log("Servidor Express.js en ejecución en localhost:9000");
 });
