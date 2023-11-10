@@ -4,6 +4,6 @@ const { updateBasicDataFromProfile } = require("../controllers/updateProfileCont
 const { verifyToken } = require("../middlewares/authMiddleware");
 
 //router.put("/actualizarperfil", verifyToken, updateBasicDataFromProfile);
-router.put("/actualizarperfil", updateBasicDataFromProfile);
+router.put("/updateprofile", updateBasicDataFromProfile);
 
 module.exports = router;
