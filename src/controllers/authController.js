@@ -16,6 +16,8 @@ const bcrypt = require("bcryptjs");
 const secretKey = process.env.SECRET_KEY_JWT;
 const nodemailer = require("nodemailer");
 
+const { supabase } = require("../configs/databaseConfig");
+
 // Configura el transporte de nodemailer con tus credenciales de Gmail
 const transporter = nodemailer.createTransport({
 	service: "gmail",
@@ -184,6 +186,22 @@ async function users(req, res) {
 	res.json(data);
 }
 
+async function recoverUserByEmail(req, res) {
+	try {
+		const { data, error } = await supabase.from("users").select("*").eq("email", req.params.email).single();
+
+		if (error) {
+			throw error;
+		}
+  
+	  // Enviar los datos del usuario como respuesta
+	  res.json(data);
+	} catch (error) {
+	  console.error("Error al obtener usuario por correo:", error);
+	  res.status(500).json({ error: "Error al obtener usuario por correo" });
+	}
+  }
+
 module.exports = {
 	loginUser,
 	loginGoogleUser,
@@ -191,4 +209,5 @@ module.exports = {
 	recoveryPasswordUser,
 	currentUser,
 	users,
+	recoverUserByEmail
 };
