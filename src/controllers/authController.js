@@ -152,36 +152,16 @@ async function users(req, res) {
 
 async function recoverUserByEmail(req, res) {
 	try {
-		const { data, error } = await supabase.from("users").select("*").eq("email", req.params.email).single();
-
-		if (error) {
-			throw error;
-		}
-  
-	  // Enviar los datos del usuario como respuesta
-	  res.json(data);
-	} catch (error) {
-	  console.error("Error al obtener usuario por correo:", error);
-	  res.status(500).json({ error: "Error al obtener usuario por correo" });
-	}
-  }
-
-async function recoverUserByEmaill(req, res) {
-	try {
-		const email = req.params.email;
+		const { email } = req.body;
 		//SEARCH IF THE USER EXISTS
 		const { data, error } = await supabase.from("users").select("*").eq("email", email).single();
 
 		// IF USER DOESNT EXIST
 		if (error) {
-			throw error;
+			throw new Error("Email does not exist");
 		}
 
 		//CREATE AND SEND CODE IF USER EXISTS
-
-		//Code types: delete_account, recover_password, change_password
-		const { type } = req.body;
-
 		const randomCode = Math.floor(1000 + Math.random() * 9000);
 
 		const currentDate = new Date();
@@ -192,15 +172,7 @@ async function recoverUserByEmaill(req, res) {
 		const creationDate = currentDate.toISOString(); // Fecha y hora de creación
 		const expirationDateString = expirationDate.toISOString(); // Fecha y hora de expiración
 
-		message_type = "";
-
-		if (type == "delete_account") {
-			message_type = " para eliminar su cuenta es: ";
-		} else if (type == "recover_password") {
-			message_type = " para recuperar su contraseña es: ";
-		} else if (type == "change_password") {
-			message_type = " para cambiar su contraseña es: ";
-		}
+		const type = "recover_password";
 
 		const insert = await insertCode(
 			creationDate,
@@ -210,16 +182,13 @@ async function recoverUserByEmaill(req, res) {
 			type
 		);
 
-		console.log(email, type);
-
 		// Define el contenido del correo electrónico
 		const mailOptions = {
 			from: "univallealtoque@gmail.com",
 			to: email,
 			subject: "Univalle AlToque - Código de verificación",
 			text:
-				"Estimado usuario, \nEl código de verificación" +
-				`${message_type}` +
+				"Estimado usuario, \nEl código de verificación para recuperar su contraseña es: " +
 				`${randomCode}` +
 				"\nEl código tiene una vigencia de 15 minutos.",
 		};
@@ -230,16 +199,13 @@ async function recoverUserByEmaill(req, res) {
 				res.status(500).json({ message: "Error sending email" });
 				console.log("Error al enviar el correo electrónico:", error);
 			} else {
-				// res.status(200).json({ message: "Email sent successfully" });
+				res.status(200).json({ message: "Email sent successfully" });
 				console.log("Correo electrónico enviado:", info.response);
 			}
 		});
-
-		// Enviar los datos del usuario como respuesta
-		res.json(data);
 	} catch (error) {
-		console.error("Error al obtener usuario por correo:", error);
-		res.status(500).json({ error: "Error al obtener usuario por correo" });
+		console.error("Error: " + `${error}`);
+		res.status(500).json({ error: `${error}` });
 	}
 }
 

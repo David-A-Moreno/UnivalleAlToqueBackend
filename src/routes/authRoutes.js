@@ -14,7 +14,7 @@ router.post("/login", loginUser);
 router.post("/logingoogle", loginGoogleUser);
 router.post("/register/user", registerUser);
 router.get("/users", users);
-router.get("/user/:email", recoverUserByEmail); // Nueva ruta para obtener usuario por correo
+router.post("/user/recover", recoverUserByEmail); // Nueva ruta para obtener usuario por correo
 router.post("/user/delete/code", deleteUserAccountCode);
 router.post("/user/delete/confirm", deleteUserAccountConfirm);
 
