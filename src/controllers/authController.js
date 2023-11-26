@@ -15,7 +15,6 @@ const { verifyTokenGoogle } = require("../middlewares/authMiddleware");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const secretKey = process.env.SECRET_KEY_JWT;
-const mailPassword = process.env.MAIL_PASSWORD;
 const nodemailer = require("nodemailer");
 
 const { supabase } = require("../configs/databaseConfig");
@@ -165,13 +164,13 @@ async function generateSendCode(req, res) {
 	// Envia el correo electrónico
 	transporter.sendMail(mailOptions, (error, info) => {
 		if (error) {
+			res.status(500).json({ message: "Error sending email" });
 			console.log("Error al enviar el correo electrónico:", error);
 		} else {
+			res.status(200).json({ message: "Email sent successfully" });
 			console.log("Correo electrónico enviado:", info.response);
 		}
 	});
-
-	res.status(200).json({ message: "Email sent successfully" });
 }
 
 // Ruta para enviar el correo electrónico
