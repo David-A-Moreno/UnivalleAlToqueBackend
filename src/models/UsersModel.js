@@ -37,9 +37,16 @@ const getUsers = async () => {
 const insertUser = async (name, last_name, email, hashedPassword) => {
 	try {
 		// Guardar los datos adicionales del usuario en la tabla 'usuarios'
-		const { data, error: insertError } = await supabase
-			.from("users")
-			.insert([{ name, last_name,  email, password: hashedPassword, phone: "+57 000 000 00 00", program: "----------------" }]);
+		const { data, error: insertError } = await supabase.from("users").insert([
+			{
+				name,
+				last_name,
+				email,
+				password: hashedPassword,
+				phone: "+57 000 000 00 00",
+				program: "----------------",
+			},
+		]);
 
 		//Si hay un error durante la insercion de los datos del usuario
 		if (insertError) {
@@ -133,6 +140,24 @@ const updateUserPassword = async (newData, user_id) => {
 	}
 };
 
+const updateUserStatus = async (user_id, status) => {
+	try {
+		const { data, error } = await supabase
+			.from("users")
+			.update({ status: status })
+			.eq("user_id", user_id);
+
+		//Si hay un error
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		return "OK";
+	} catch (error) {
+		throw new Error("DB: Error updating user status" + `${error}`);
+	}
+};
+
 module.exports = {
 	getUserByEmail,
 	getUsers,
@@ -142,4 +167,5 @@ module.exports = {
 	updatePasswordUser,
 	updateUserPassword,
 	searchUser,
+	updateUserStatus,
 };

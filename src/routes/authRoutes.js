@@ -4,21 +4,18 @@ const {
 	loginUser,
 	loginGoogleUser,
 	registerUser,
-	recoveryPasswordUser,
-	currentUser,
 	users,
 	recoverUserByEmail,
-	generateSendCode,
+	deleteUserAccountCode,
+	deleteUserAccountConfirm,
 } = require("../controllers/authController");
-const { verifyToken } = require("../middlewares/authMiddleware");
 
 router.post("/login", loginUser);
 router.post("/logingoogle", loginGoogleUser);
 router.post("/register/user", registerUser);
-router.post("/sendrecoveryemail", recoveryPasswordUser);
-router.post("/generatesendcode", generateSendCode);
-router.get("/currentuser", verifyToken, currentUser);
 router.get("/users", users);
 router.get("/user/:email", recoverUserByEmail); // Nueva ruta para obtener usuario por correo
+router.post("/user/delete/code", deleteUserAccountCode);
+router.post("/user/delete/confirm", deleteUserAccountConfirm);
 
 module.exports = router;
