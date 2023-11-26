@@ -188,6 +188,22 @@ async function users(req, res) {
 
 async function recoverUserByEmail(req, res) {
 	try {
+		const { data, error } = await supabase.from("users").select("*").eq("email", req.params.email).single();
+
+		if (error) {
+			throw error;
+		}
+  
+	  // Enviar los datos del usuario como respuesta
+	  res.json(data);
+	} catch (error) {
+	  console.error("Error al obtener usuario por correo:", error);
+	  res.status(500).json({ error: "Error al obtener usuario por correo" });
+	}
+  }
+
+async function recoverUserByEmaill(req, res) {
+	try {
 		const email = req.params.email;
 		//SEARCH IF THE USER EXISTS
 		const { data, error } = await supabase.from("users").select("*").eq("email", email).single();
