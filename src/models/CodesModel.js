@@ -14,7 +14,7 @@ const insertCode = async (created_at, expires, code, user_id, type) => {
 
 		return data;
 	} catch (error) {
-		throw new Error("DB: Error inserting new code" + error);
+		throw new Error("DB: Error inserting new code " + error);
 	}
 };
 

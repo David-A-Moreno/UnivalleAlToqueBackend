@@ -9,6 +9,7 @@ const {
 	updatePasswordUser,
 	searchUser,
 	insertGoogleUser,
+	updateUserStatus,
 } = require("../models/UsersModel");
 const { insertCode } = require("../models/CodesModel");
 const { verifyTokenGoogle } = require("../middlewares/authMiddleware");
@@ -123,33 +124,6 @@ async function loginGoogleUser(req, res) {
 	}
 }
 
-async function generateSendCode(req, res) {}
-
-// Ruta para enviar el correo electrónico
-async function recoveryPasswordUser(req, res) {
-	// const { to, subject, body } = req.body;
-	// newData = {};
-	// newData["contrasena"] = Math.random().toString(36).slice(-8);
-	// const mailOptions = {
-	// 	from: "romainteractiva@gmail.com",
-	// 	to,
-	// 	subject,
-	// 	html: body + newData["contrasena"],
-	// };
-	// newData["contrasena"] = await bcrypt.hash(newData["contrasena"], 10);
-	// const newPassword = await updatePasswordUser(to);
-	// // Envía el correo electrónico utilizando nodemailer
-	// transporter.sendMail(mailOptions, (error, info) => {
-	// 	if (error) {
-	// 		console.error("Error al enviar el correo electrónico:", error);
-	// 		res.status(500).json("Ocurrió un error al enviar el correo electrónico");
-	// 	} else {
-	// 		console.log("Correo electrónico enviado:", info.response);
-	// 		res.status(200).json({ message: "Correo electrónico enviado exitosamente" });
-	// 	}
-	// });
-}
-
 //POST para el registro de usuarios
 async function registerUser(req, res) {
 	try {
@@ -167,16 +141,6 @@ async function registerUser(req, res) {
 		console.error("Error al crear el usuario:", error);
 		res.status(500).json({ error: error.message });
 	}
-}
-
-async function currentUser(req, res) {
-	const userId = req.user.user_id;
-	const email = req.user.email;
-	const username = req.user.nickname;
-
-	console.log("INFO TOKEN:", userId, email, username);
-
-	res.json({ userId, email, username });
 }
 
 // // Obtener informacion de todos los usuarios de la base de datos
@@ -263,13 +227,124 @@ async function recoverUserByEmail(req, res) {
 	}
 }
 
+async function deleteUserAccountCode(req, res) {
+	try {
+		const { user_id, password } = req.body;
+		//SEARCH IF THE USER EXISTS
+		const { data, error } = await supabase
+			.from("users")
+			.select("*")
+			.eq("user_id", user_id)
+			.single();
+
+		if (error) {
+			throw new Error("Error getting user data");
+		}
+
+		// Verificar el hash de la contraseña
+		const passwordHash = data.password;
+
+		// Comparar el hash almacenado con el hash de la contraseña proporcionada por el usuario
+		const match = await bcrypt.compare(password, passwordHash);
+
+		// Si las contraseñas no coinciden, se envía una respuesta de error
+		if (!match) {
+			throw new Error("Invalid password");
+		}
+
+		//CREATE AND SEND CODE
+
+		const randomCode = Math.floor(1000 + Math.random() * 9000);
+
+		const currentDate = new Date();
+
+		// Calcular la fecha de expiración (15 minutos después)
+		const expirationDate = new Date(currentDate.getTime() + 15 * 60000); // 15 minutos en milisegundos
+
+		const creationDate = currentDate.toISOString(); // Fecha y hora de creación
+		const expirationDateString = expirationDate.toISOString(); // Fecha y hora de expiración
+
+		const type = "delete_account";
+
+		const insert = await insertCode(
+			creationDate,
+			expirationDateString,
+			randomCode,
+			data.user_id,
+			type
+		);
+
+		const mailOptions = {
+			from: "univallealtoque@gmail.com",
+			to: data.email,
+			subject: "Univalle AlToque - Código de verificación",
+			text:
+				"Estimado usuario, \nEl código de verificación para eliminar su cuenta es: " +
+				`${randomCode}` +
+				"\nEl código tiene una vigencia de 15 minutos.",
+		};
+
+		// Envia el correo electrónico
+		transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				res.status(500).json({ error: "Error sending email" });
+				console.log("Error al enviar el correo electrónico:", error);
+			} else {
+				res.status(200).json({ message: "Code sent" });
+				console.log("Correo electrónico enviado:", info.response);
+			}
+		});
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+	}
+}
+
+async function deleteUserAccountConfirm(req, res) {
+	try {
+		const { user_id, code } = req.body;
+
+		//Buscar si el código existe
+		const { data, error } = await supabase
+			.from("codes")
+			.select("*")
+			.eq("code", code)
+			.eq("user_id", user_id)
+			.eq("type", "delete_account")
+			.single();
+
+		//Si el código no existe
+		if (error) {
+			throw new Error("Invalid code");
+		}
+
+		const currentTime = new Date();
+		const expirationTime = new Date(data.expires);
+
+		//Verificar si el código ha expirado
+		const expiredCode = expirationTime < currentTime;
+
+		console.log(currentTime, " ", expirationTime, expiredCode);
+
+		if (expiredCode) {
+			throw new Error("Code expired");
+		} else {
+			const inactivateUser = await updateUserStatus(user_id, "inactive");
+
+			if (inactivateUser == "OK") {
+				res.status(200).json({ message: "User successfully deactivated" });
+			}
+		}
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+	}
+}
+
 module.exports = {
 	loginUser,
 	loginGoogleUser,
 	registerUser,
-	recoveryPasswordUser,
-	currentUser,
 	users,
 	recoverUserByEmail,
-	generateSendCode,
+	deleteUserAccountConfirm,
+	deleteUserAccountCode,
 };
