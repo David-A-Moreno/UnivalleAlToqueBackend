@@ -123,55 +123,7 @@ async function loginGoogleUser(req, res) {
 	}
 }
 
-async function generateSendCode(req, res) {
-	//Code types: delete_account, recover_password, change_password
-	const { user_id, type } = req.body;
-
-	const randomCode = Math.floor(1000 + Math.random() * 9000);
-
-	const currentDate = new Date();
-
-	// Calcular la fecha de expiración (15 minutos después)
-	const expirationDate = new Date(currentDate.getTime() + 15 * 60000); // 15 minutos en milisegundos
-
-	const creationDate = currentDate.toISOString(); // Fecha y hora de creación
-	const expirationDateString = expirationDate.toISOString(); // Fecha y hora de expiración
-
-	message_type = "";
-
-	if (type == "delete_account") {
-		message_type = " para eliminar su cuenta es: ";
-	} else if (type == "recover_password") {
-		message_type = " para recuperar su contraseña es: ";
-	} else if (type == "change_password") {
-		message_type = " para cambiar su contraseña es: ";
-	}
-
-	const insert = await insertCode(creationDate, expirationDateString, randomCode, user_id, type);
-
-	// Define el contenido del correo electrónico
-	const mailOptions = {
-		from: "univallealtoque@gmail.com",
-		to: "alessandro.diaz@correounivalle.edu.co",
-		subject: "Univalle AlToque - Código de verificación",
-		text:
-			"Estimado usuario, \nEl código de verificación" +
-			`${message_type}` +
-			`${randomCode}` +
-			"\nEl código tiene una vigencia de 15 minutos.",
-	};
-
-	// Envia el correo electrónico
-	transporter.sendMail(mailOptions, (error, info) => {
-		if (error) {
-			res.status(500).json({ message: "Error sending email" });
-			console.log("Error al enviar el correo electrónico:", error);
-		} else {
-			res.status(200).json({ message: "Email sent successfully" });
-			console.log("Correo electrónico enviado:", info.response);
-		}
-	});
-}
+async function generateSendCode(req, res) {}
 
 // Ruta para enviar el correo electrónico
 async function recoveryPasswordUser(req, res) {
@@ -236,15 +188,72 @@ async function users(req, res) {
 
 async function recoverUserByEmail(req, res) {
 	try {
-		const { data, error } = await supabase
-			.from("users")
-			.select("*")
-			.eq("email", req.params.email)
-			.single();
+		const email = req.params.email;
+		//SEARCH IF THE USER EXISTS
+		const { data, error } = await supabase.from("users").select("*").eq("email", email).single();
 
+		// IF USER DOESNT EXIST
 		if (error) {
 			throw error;
 		}
+
+		//CREATE AND SEND CODE IF USER EXISTS
+
+		//Code types: delete_account, recover_password, change_password
+		const { type } = req.body;
+
+		const randomCode = Math.floor(1000 + Math.random() * 9000);
+
+		const currentDate = new Date();
+
+		// Calcular la fecha de expiración (15 minutos después)
+		const expirationDate = new Date(currentDate.getTime() + 15 * 60000); // 15 minutos en milisegundos
+
+		const creationDate = currentDate.toISOString(); // Fecha y hora de creación
+		const expirationDateString = expirationDate.toISOString(); // Fecha y hora de expiración
+
+		message_type = "";
+
+		if (type == "delete_account") {
+			message_type = " para eliminar su cuenta es: ";
+		} else if (type == "recover_password") {
+			message_type = " para recuperar su contraseña es: ";
+		} else if (type == "change_password") {
+			message_type = " para cambiar su contraseña es: ";
+		}
+
+		const insert = await insertCode(
+			creationDate,
+			expirationDateString,
+			randomCode,
+			data.user_id,
+			type
+		);
+
+		console.log(email, type);
+
+		// Define el contenido del correo electrónico
+		const mailOptions = {
+			from: "univallealtoque@gmail.com",
+			to: email,
+			subject: "Univalle AlToque - Código de verificación",
+			text:
+				"Estimado usuario, \nEl código de verificación" +
+				`${message_type}` +
+				`${randomCode}` +
+				"\nEl código tiene una vigencia de 15 minutos.",
+		};
+
+		// Envia el correo electrónico
+		transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				res.status(500).json({ message: "Error sending email" });
+				console.log("Error al enviar el correo electrónico:", error);
+			} else {
+				// res.status(200).json({ message: "Email sent successfully" });
+				console.log("Correo electrónico enviado:", info.response);
+			}
+		});
 
 		// Enviar los datos del usuario como respuesta
 		res.json(data);
