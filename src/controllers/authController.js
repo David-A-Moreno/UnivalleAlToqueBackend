@@ -9,11 +9,13 @@ const {
 	updatePasswordUser,
 	searchUser,
 	insertGoogleUser,
-} = require("../models/UsuariosModel");
+} = require("../models/UsersModel");
+const { insertCode } = require("../models/CodesModel");
 const { verifyTokenGoogle } = require("../middlewares/authMiddleware");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const secretKey = process.env.SECRET_KEY_JWT;
+const mailPassword = process.env.MAIL_PASSWORD;
 const nodemailer = require("nodemailer");
 
 const { supabase } = require("../configs/databaseConfig");
@@ -38,6 +40,11 @@ async function loginUser(req, res) {
 
 		// Realizar la consulta para obtener todos los datos del usuario en la base de datos
 		const userData = await getUserByEmail(email);
+
+		// Verificar si el usuario no esta desactivado
+		if (userData.status != "active") {
+			throw new Error("Credenciales de inicio de sesión inválidas");
+		}
 
 		// Verificar el hash de la contraseña
 		const passwordHash = userData.password;
@@ -117,35 +124,79 @@ async function loginGoogleUser(req, res) {
 	}
 }
 
-// Ruta para enviar el correo electrónico
-async function recoveryPasswordUser(req, res) {
-	const { to, subject, body } = req.body;
+async function generateSendCode(req, res) {
+	//Code types: delete_account, recover_password, change_password
+	const { user_id, type } = req.body;
 
-	newData = {};
+	const randomCode = Math.floor(1000 + Math.random() * 9000);
 
-	newData["contrasena"] = Math.random().toString(36).slice(-8);
+	const currentDate = new Date();
 
+	// Calcular la fecha de expiración (15 minutos después)
+	const expirationDate = new Date(currentDate.getTime() + 15 * 60000); // 15 minutos en milisegundos
+
+	const creationDate = currentDate.toISOString(); // Fecha y hora de creación
+	const expirationDateString = expirationDate.toISOString(); // Fecha y hora de expiración
+
+	message_type = "";
+
+	if (type == "delete_account") {
+		message_type = " para eliminar su cuenta es: ";
+	} else if (type == "recover_password") {
+		message_type = " para recuperar su contraseña es: ";
+	} else if (type == "change_password") {
+		message_type = " para cambiar su contraseña es: ";
+	}
+
+	const insert = await insertCode(creationDate, expirationDateString, randomCode, user_id, type);
+
+	// Define el contenido del correo electrónico
 	const mailOptions = {
-		from: "romainteractiva@gmail.com",
-		to,
-		subject,
-		html: body + newData["contrasena"],
+		from: "univallealtoque@gmail.com",
+		to: "alessandro.diaz@correounivalle.edu.co",
+		subject: "Univalle AlToque - Código de verificación",
+		text:
+			"Estimado usuario, \nEl código de verificación" +
+			`${message_type}` +
+			`${randomCode}` +
+			"\nEl código tiene una vigencia de 15 minutos.",
 	};
 
-	newData["contrasena"] = await bcrypt.hash(newData["contrasena"], 10);
-
-	const newPassword = await updatePasswordUser(to);
-
-	// Envía el correo electrónico utilizando nodemailer
+	// Envia el correo electrónico
 	transporter.sendMail(mailOptions, (error, info) => {
 		if (error) {
-			console.error("Error al enviar el correo electrónico:", error);
-			res.status(500).json("Ocurrió un error al enviar el correo electrónico");
+			console.log("Error al enviar el correo electrónico:", error);
 		} else {
 			console.log("Correo electrónico enviado:", info.response);
-			res.status(200).json({ message: "Correo electrónico enviado exitosamente" });
 		}
 	});
+
+	res.status(200).json({ message: "Email sent successfully" });
+}
+
+// Ruta para enviar el correo electrónico
+async function recoveryPasswordUser(req, res) {
+	// const { to, subject, body } = req.body;
+	// newData = {};
+	// newData["contrasena"] = Math.random().toString(36).slice(-8);
+	// const mailOptions = {
+	// 	from: "romainteractiva@gmail.com",
+	// 	to,
+	// 	subject,
+	// 	html: body + newData["contrasena"],
+	// };
+	// newData["contrasena"] = await bcrypt.hash(newData["contrasena"], 10);
+	// const newPassword = await updatePasswordUser(to);
+	// // Envía el correo electrónico utilizando nodemailer
+	// transporter.sendMail(mailOptions, (error, info) => {
+	// 	if (error) {
+	// 		console.error("Error al enviar el correo electrónico:", error);
+	// 		res.status(500).json("Ocurrió un error al enviar el correo electrónico");
+	// 	} else {
+	// 		console.log("Correo electrónico enviado:", info.response);
+	// 		res.status(200).json({ message: "Correo electrónico enviado exitosamente" });
+	// 	}
+	// });
 }
 
 //POST para el registro de usuarios
@@ -157,9 +208,7 @@ async function registerUser(req, res) {
 		// Generar el hash de la contraseña
 		const hashedPassword = await bcrypt.hash(password, 10); // 10 es el número de rondas de hashing
 
-
 		const data = await insertUser(name, last_name, email, hashedPassword);
-
 
 		//Respuesta
 		res.json("OK");
@@ -188,19 +237,23 @@ async function users(req, res) {
 
 async function recoverUserByEmail(req, res) {
 	try {
-		const { data, error } = await supabase.from("users").select("*").eq("email", req.params.email).single();
+		const { data, error } = await supabase
+			.from("users")
+			.select("*")
+			.eq("email", req.params.email)
+			.single();
 
 		if (error) {
 			throw error;
 		}
-  
-	  // Enviar los datos del usuario como respuesta
-	  res.json(data);
+
+		// Enviar los datos del usuario como respuesta
+		res.json(data);
 	} catch (error) {
-	  console.error("Error al obtener usuario por correo:", error);
-	  res.status(500).json({ error: "Error al obtener usuario por correo" });
+		console.error("Error al obtener usuario por correo:", error);
+		res.status(500).json({ error: "Error al obtener usuario por correo" });
 	}
-  }
+}
 
 module.exports = {
 	loginUser,
@@ -209,5 +262,6 @@ module.exports = {
 	recoveryPasswordUser,
 	currentUser,
 	users,
-	recoverUserByEmail
+	recoverUserByEmail,
+	generateSendCode,
 };
