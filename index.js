@@ -12,8 +12,6 @@
 require("dotenv").config();
 
 const express = require("express");
-// const bodyParser = require("body-parser");
-// const cors = require("cors");
 
 //IMPORTAR RUTAS
 const authRoutes = require("./src/routes/authRoutes");
@@ -32,7 +30,6 @@ app.use(express.urlencoded({ extended: true }));
 //app.use(cors());
 app.use(configureCORS);
 app.use(authRoutes);
-// app.use(userQuizRoutes);
 app.use(updateProfileRoutes);
 // app.use(uploadRoutes);
 
