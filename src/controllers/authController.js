@@ -20,15 +20,19 @@ const nodemailer = require("nodemailer");
 
 const { supabase } = require("../configs/databaseConfig");
 
-// Configura el transporte de nodemailer con tus credenciales de Gmail
 const transporter = nodemailer.createTransport({
+	name: "gmail",
 	service: "gmail",
+	secure: true,
 	host: "smtp.gmail.com",
 	port: 465,
-	secure: true,
 	auth: {
-		user: "romainteractiva@gmail.com",
-		pass: "moqkwrtblblthnaw",
+		type: "OAuth2",
+		user: process.env.MAIL_USERNAME,
+		pass: process.env.MAIL_PASSWORD,
+		clientId: process.env.OAUTH_CLIENTID,
+		clientSecret: process.env.OAUTH_CLIENT_SECRET,
+		refreshToken: process.env.OAUTH_REFRESH_TOKEN,
 	},
 });
 
@@ -182,15 +186,25 @@ async function recoverUserByEmail(req, res) {
 			type
 		);
 
+		const htmlContent = `
+			<html>
+				<head>
+					<title>Código de verificación</title>
+				</head>
+				<body>
+					<h3>Estimado usuario,</h3>
+					<p>El código de verificación para recuperar su contraseña es: <strong>${randomCode}</strong></p> 
+					<p>El código tiene una vigencia de 15 minutos.</p>
+				</body>
+			</html>
+			`;
+
 		// Define el contenido del correo electrónico
 		const mailOptions = {
-			from: "univallealtoque@gmail.com",
-			to: email,
-			subject: "Univalle AlToque - Código de verificación",
-			text:
-				"Estimado usuario, \nEl código de verificación para recuperar su contraseña es: " +
-				`${randomCode}` +
-				"\nEl código tiene una vigencia de 15 minutos.",
+			from: "Univalle AlToque uvaltoque@gmail.com",
+			to: data.email,
+			subject: "Univalle AlToque - Recuperar contraseña",
+			html: htmlContent,
 		};
 
 		// Envia el correo electrónico
@@ -199,8 +213,9 @@ async function recoverUserByEmail(req, res) {
 				res.status(500).json({ message: "Error sending email" });
 				console.log("Error al enviar el correo electrónico:", error);
 			} else {
+				console.log("Message sent: %s", info.messageId);
 				res.status(200).json({ message: "Email sent successfully" });
-				console.log("Correo electrónico enviado:", info.response);
+				console.log("Correo electrónico enviado:", info.response, info);
 			}
 		});
 	} catch (error) {
@@ -256,14 +271,24 @@ async function deleteUserAccountCode(req, res) {
 			type
 		);
 
+		const htmlContent = `
+			<html>
+				<head>
+					<title>Código de verificación</title>
+				</head>
+				<body>
+					<h3>Estimado usuario,</h3>
+					<p>El código de verificación para eliminar su cuenta de usuario es: <strong>${randomCode}</strong></p> 
+					<p>El código tiene una vigencia de 15 minutos.</p>
+				</body>
+			</html>
+			`;
+
 		const mailOptions = {
-			from: "univallealtoque@gmail.com",
+			from: "Univalle AlToque uvaltoque@gmail.com",
 			to: data.email,
-			subject: "Univalle AlToque - Código de verificación",
-			text:
-				"Estimado usuario, \nEl código de verificación para eliminar su cuenta es: " +
-				`${randomCode}` +
-				"\nEl código tiene una vigencia de 15 minutos.",
+			subject: "Univalle AlToque - Eliminar cuenta de usuario",
+			html: htmlContent,
 		};
 
 		// Envia el correo electrónico
