@@ -333,7 +333,7 @@ async function deleteUserAccountConfirm(req, res) {
 		console.log(currentTime, " ", expirationTime, expiredCode);
 
 		if (expiredCode) {
-			throw new Error("Code expired");
+			res.status(202).json({ message: "Code expired" });
 		} else {
 			const inactivateUser = await updateUserStatus(user_id, "inactive");
 
