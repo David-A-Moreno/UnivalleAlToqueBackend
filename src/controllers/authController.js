@@ -346,6 +346,56 @@ async function deleteUserAccountConfirm(req, res) {
 	}
 }
 
+async function getCodeByEmail(req, res) {
+	try {
+	  const { email } = req.params;
+  
+	  // Obtener user_id mediante el correo proporcionado
+	  const { data: userData, error: userError } = await supabase
+		.from("users")
+		.select("user_id")
+		.eq("email", email)
+		.single();
+  
+	  if (userError) {
+		throw new Error("Error retrieving user data");
+	  }
+  
+	  const { data: codeData, error: codeError } = await supabase
+		.from("codes")
+		.select("code", "expires")
+		.eq("user_id", userData.user_id)
+		.eq("type", "recover_password")
+		.order("created_at", { ascending: false })
+		.limit(1)
+		.single();
+  
+	  if (codeError) {
+		throw new Error("Error retrieving code data");
+	  }
+  
+	  if (!codeData) {
+		res.status(404).json({ message: "Code not found" });
+		return;
+	  }
+  
+	  const currentTime = new Date();
+	  const expirationTime = new Date(codeData.expires);
+  
+	  // Verificar si el código ha expirado
+	  const isCodeExpired = expirationTime < currentTime;
+  
+	  if (isCodeExpired) {
+		res.status(404).json({ message: "Code has expired" });
+		return;
+	  }
+  
+	  res.status(200).json({ code: codeData.code });
+	} catch (error) {
+	  res.status(500).json({ error: error.message });
+	}
+  }
+
 module.exports = {
 	loginUser,
 	loginGoogleUser,
@@ -354,4 +404,5 @@ module.exports = {
 	recoverUserByEmail,
 	deleteUserAccountConfirm,
 	deleteUserAccountCode,
+	getCodeByEmail
 };
