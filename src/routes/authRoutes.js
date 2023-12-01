@@ -11,6 +11,7 @@ const {
 	getCodeByEmail,
 	lockoutUser,
 	changeUserPassword,
+	newUserPassword
 } = require("../controllers/authController");
 
 router.post("/login", loginUser);
@@ -23,5 +24,7 @@ router.post("/user/delete/confirm", deleteUserAccountConfirm);
 router.get("/user/code/:email", getCodeByEmail);
 router.put("/user/lockout", lockoutUser);
 router.post("/user/change/password", changeUserPassword);
+router.post("/user/newpassword", newUserPassword);
+
 
 module.exports = router;

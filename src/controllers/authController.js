@@ -477,6 +477,29 @@ async function changeUserPassword(req, res) {
 	}
 }
 
+async function newUserPassword(req, res) {
+	try {
+		const { email, new_password } = req.body;
+
+		// Generar el hash de la contraseña nueva
+		const hashedPassword = await bcrypt.hash(new_password, 10); // 10 es el número de rondas de hashing
+
+		const { data: updatePassword, error: errorUpdating } = await supabase
+			.from("users")
+			.update({ password: hashedPassword })
+			.eq("email", email);
+
+		if (errorUpdating) {
+			res.status(401).json({ message: "Error updating user password" });
+		}
+
+		res.status(200).json({ message: "Password updated successfully" });
+	} catch (error) {
+		console.error("Error:", error);
+		res.status(500).json({ error: "Credenciales de inicio de sesión inválidas" });
+	}
+}
+
 module.exports = {
 	loginUser,
 	loginGoogleUser,
@@ -488,4 +511,5 @@ module.exports = {
 	getCodeByEmail,
 	lockoutUser,
 	changeUserPassword,
+	newUserPassword,
 };
