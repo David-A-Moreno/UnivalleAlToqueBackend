@@ -218,7 +218,9 @@ async function recoverUserByEmail(req, res) {
 
 		if (dataCode != null) {
 			const randomCode = dataCode.code;
-			const expirationDateString = dataCode.expires;
+
+			const expirationTime = new Date(dataCode.expires);
+			const expirationDateString = expirationTime.toISOString();
 			console.log(expirationDateString);
 			if (dataCode.expires > fechaFormateada) {
 				res.status(200).json({ message: "Code already sent", randomCode, expirationDateString });
