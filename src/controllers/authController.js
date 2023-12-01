@@ -196,6 +196,15 @@ async function recoverUserByEmail(req, res) {
 
 		const currentDate = new Date();
 
+		const fechaFormateada = currentDate.toISOString();
+
+		console.log("lockout time" + data.lockout_time);
+		console.log("current date" + fechaFormateada);
+
+		if (data.lockout_time > fechaFormateada) {
+			res.status(200).json({message:"El usuario está suspendido"});
+		}
+
 		// Calcular la fecha de expiración (15 minutos después)
 		const expirationDate = new Date(currentDate.getTime() + 15 * 60000); // 15 minutos en milisegundos
 
