@@ -150,7 +150,7 @@ async function registerUser(req, res) {
 async function lockoutUser(req, res) {
 	try {
 		//Datos de registro del usuario recibidos
-		const { email} = req.body;
+		const { email } = req.body;
 
 		const currentDate = new Date();
 
@@ -161,9 +161,8 @@ async function lockoutUser(req, res) {
 
 		const { data, error } = await supabase
 			.from("users")
-			.update({ lockout_time: expirationDateString})
+			.update({ lockout_time: expirationDateString })
 			.eq("email", email);
-
 
 		//Respuesta
 		res.json("The User has been lockedout");
@@ -191,6 +190,11 @@ async function recoverUserByEmail(req, res) {
 			throw new Error("Email does not exist");
 		}
 
+		// Verificar si el usuario no esta desactivado
+		if (data.status != "active") {
+			throw new Error("User is deactivated");
+		}
+
 		//CREATE AND SEND CODE IF USER EXISTS
 		const randomCode = Math.floor(1000 + Math.random() * 9000);
 
@@ -202,7 +206,7 @@ async function recoverUserByEmail(req, res) {
 		console.log("current date" + fechaFormateada);
 
 		if (data.lockout_time > fechaFormateada) {
-			res.status(200).json({message:"El usuario está suspendido"});
+			res.status(200).json({ message: "El usuario está suspendido" });
 		}
 
 		// Calcular la fecha de expiración (15 minutos después)
@@ -249,7 +253,9 @@ async function recoverUserByEmail(req, res) {
 				console.log("Error al enviar el correo electrónico:", error);
 			} else {
 				console.log("Message sent: %s", info.messageId);
-				res.status(200).json({message:"Email sent successfully", randomCode, expirationDateString });
+				res
+					.status(200)
+					.json({ message: "Email sent successfully", randomCode, expirationDateString });
 				console.log("Correo electrónico enviado:", info.response, info);
 			}
 		});
@@ -383,53 +389,53 @@ async function deleteUserAccountConfirm(req, res) {
 
 async function getCodeByEmail(req, res) {
 	try {
-	  const { email } = req.params;
-  
-	  // Obtener user_id mediante el correo proporcionado
-	  const { data: userData, error: userError } = await supabase
-		.from("users")
-		.select("user_id")
-		.eq("email", email)
-		.single();
-  
-	  if (userError) {
-		throw new Error("Error retrieving user data");
-	  }
-  
-	  const { data: codeData, error: codeError } = await supabase
-		.from("codes")
-		.select("code", "expires")
-		.eq("user_id", userData.user_id)
-		.eq("type", "recover_password")
-		.order("created_at", { ascending: false })
-		.limit(1)
-		.single();
-  
-	  if (codeError) {
-		throw new Error("Error retrieving code data");
-	  }
-  
-	  if (!codeData) {
-		res.status(404).json({ message: "Code not found" });
-		return;
-	  }
-  
-	  const currentTime = new Date();
-	  const expirationTime = new Date(codeData.expires);
-  
-	  // Verificar si el código ha expirado
-	  const isCodeExpired = expirationTime < currentTime;
-  
-	  if (isCodeExpired) {
-		res.status(404).json({ message: "Code has expired" });
-		return;
-	  }
-  
-	  res.status(200).json({ code: codeData.code });
+		const { email } = req.params;
+
+		// Obtener user_id mediante el correo proporcionado
+		const { data: userData, error: userError } = await supabase
+			.from("users")
+			.select("user_id")
+			.eq("email", email)
+			.single();
+
+		if (userError) {
+			throw new Error("Error retrieving user data");
+		}
+
+		const { data: codeData, error: codeError } = await supabase
+			.from("codes")
+			.select("code", "expires")
+			.eq("user_id", userData.user_id)
+			.eq("type", "recover_password")
+			.order("created_at", { ascending: false })
+			.limit(1)
+			.single();
+
+		if (codeError) {
+			throw new Error("Error retrieving code data");
+		}
+
+		if (!codeData) {
+			res.status(404).json({ message: "Code not found" });
+			return;
+		}
+
+		const currentTime = new Date();
+		const expirationTime = new Date(codeData.expires);
+
+		// Verificar si el código ha expirado
+		const isCodeExpired = expirationTime < currentTime;
+
+		if (isCodeExpired) {
+			res.status(404).json({ message: "Code has expired" });
+			return;
+		}
+
+		res.status(200).json({ code: codeData.code });
 	} catch (error) {
-	  res.status(500).json({ error: error.message });
+		res.status(500).json({ error: error.message });
 	}
-  }
+}
 
 module.exports = {
 	loginUser,
@@ -440,5 +446,5 @@ module.exports = {
 	deleteUserAccountConfirm,
 	deleteUserAccountCode,
 	getCodeByEmail,
-	lockoutUser
+	lockoutUser,
 };
