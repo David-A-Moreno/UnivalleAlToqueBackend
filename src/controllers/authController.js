@@ -147,6 +147,32 @@ async function registerUser(req, res) {
 	}
 }
 
+async function lockoutUser(req, res) {
+	try {
+		//Datos de registro del usuario recibidos
+		const { email} = req.body;
+
+		const currentDate = new Date();
+
+		// Calcular la fecha de expiración (15 minutos después)
+		const expirationDate = new Date(currentDate.getTime() + 30 * 60000); // 15 minutos en milisegundos
+
+		const expirationDateString = expirationDate.toISOString(); // Fecha y hora de expiración
+
+		const { data, error } = await supabase
+			.from("users")
+			.update({ lockout_time: expirationDateString})
+			.eq("email", email);
+
+
+		//Respuesta
+		res.json("The User has been lockedout");
+	} catch (error) {
+		console.error("Error al crear el usuario:", error);
+		res.status(500).json({ error: error.message });
+	}
+}
+
 // // Obtener informacion de todos los usuarios de la base de datos
 async function users(req, res) {
 	const data = await getUsers();
@@ -404,5 +430,6 @@ module.exports = {
 	recoverUserByEmail,
 	deleteUserAccountConfirm,
 	deleteUserAccountCode,
-	getCodeByEmail
+	getCodeByEmail,
+	lockoutUser
 };
