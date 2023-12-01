@@ -9,7 +9,8 @@ const {
 	deleteUserAccountCode,
 	deleteUserAccountConfirm,
 	getCodeByEmail,
-	lockoutUser
+	lockoutUser,
+	changeUserPassword,
 } = require("../controllers/authController");
 
 router.post("/login", loginUser);
@@ -20,6 +21,7 @@ router.post("/user/recover", recoverUserByEmail); // Nueva ruta para obtener usu
 router.post("/user/delete/code", deleteUserAccountCode);
 router.post("/user/delete/confirm", deleteUserAccountConfirm);
 router.get("/user/code/:email", getCodeByEmail);
-router.put("/user/lockout", lockoutUser)
+router.put("/user/lockout", lockoutUser);
+router.post("/user/change/password", changeUserPassword);
 
 module.exports = router;

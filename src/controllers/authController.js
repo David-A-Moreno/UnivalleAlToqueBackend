@@ -437,6 +437,46 @@ async function getCodeByEmail(req, res) {
 	}
 }
 
+async function changeUserPassword(req, res) {
+	try {
+		const { user_id, old_password, new_password } = req.body;
+
+		const { data: userData, error: errorData } = await supabase
+			.from("users")
+			.select("*")
+			.eq("user_id", user_id)
+			.single();
+
+		// Verificar el hash de la contraseña
+		const passwordHash = userData.password;
+
+		// Comparar el hash almacenado con el hash de la contraseña proporcionada por el usuario
+		const match = await bcrypt.compare(old_password, passwordHash);
+
+		// Si las contraseñas no coinciden, se envía una respuesta de error
+		if (!match) {
+			res.status(401).json({ message: "Old password is invalid" });
+		}
+
+		// Generar el hash de la contraseña nueva
+		const hashedPassword = await bcrypt.hash(new_password, 10); // 10 es el número de rondas de hashing
+
+		const { data: updatePassword, error: errorUpdating } = await supabase
+			.from("users")
+			.update({ password: hashedPassword })
+			.eq("user_id", user_id);
+
+		if (errorUpdating) {
+			res.status(401).json({ message: "Error updating user password" });
+		}
+
+		res.status(200).json({ message: "Password updated successfully" });
+	} catch (error) {
+		console.error("Error:", error);
+		res.status(500).json({ error: "Credenciales de inicio de sesión inválidas" });
+	}
+}
+
 module.exports = {
 	loginUser,
 	loginGoogleUser,
@@ -447,4 +487,5 @@ module.exports = {
 	deleteUserAccountCode,
 	getCodeByEmail,
 	lockoutUser,
+	changeUserPassword,
 };
