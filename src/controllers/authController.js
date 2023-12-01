@@ -195,19 +195,32 @@ async function recoverUserByEmail(req, res) {
 			throw new Error("User is deactivated");
 		}
 
-		//CREATE AND SEND CODE IF USER EXISTS
-		const randomCode = Math.floor(1000 + Math.random() * 9000);
-
 		const currentDate = new Date();
 
 		const fechaFormateada = currentDate.toISOString();
 
-		console.log("lockout time" + data.lockout_time);
-		console.log("current date" + fechaFormateada);
-
 		if (data.lockout_time > fechaFormateada) {
 			res.status(200).json({ message: "El usuario está suspendido" });
 		}
+
+		//VERIFY IF A CODE EXISTS
+		const { data: dataCode, error: errorCode } = await supabase
+			.from("codes")
+			.select("*")
+			.eq("user_id", data.user_id)
+			.eq("type", "recover_password")
+			.single();
+
+		console.log(dataCode);
+
+		if (dataCode != null) {
+			if (dataCode.expires > fechaFormateada) {
+				res.status(409).json({ message: "Code already sent" });
+			}
+		}
+
+		//CREATE AND SEND CODE IF USER EXISTS
+		const randomCode = Math.floor(1000 + Math.random() * 9000);
 
 		// Calcular la fecha de expiración (15 minutos después)
 		const expirationDate = new Date(currentDate.getTime() + 15 * 60000); // 15 minutos en milisegundos
@@ -252,11 +265,9 @@ async function recoverUserByEmail(req, res) {
 				res.status(500).json({ message: "Error sending email" });
 				console.log("Error al enviar el correo electrónico:", error);
 			} else {
-				console.log("Message sent: %s", info.messageId);
 				res
 					.status(200)
 					.json({ message: "Email sent successfully", randomCode, expirationDateString });
-				console.log("Correo electrónico enviado:", info.response, info);
 			}
 		});
 	} catch (error) {
