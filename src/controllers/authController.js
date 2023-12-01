@@ -214,7 +214,7 @@ async function recoverUserByEmail(req, res) {
 				console.log("Error al enviar el correo electrónico:", error);
 			} else {
 				console.log("Message sent: %s", info.messageId);
-				res.status(200).json({message:"Email sent successfully", randomCode });
+				res.status(200).json({message:"Email sent successfully", randomCode, expirationDateString });
 				console.log("Correo electrónico enviado:", info.response, info);
 			}
 		});
