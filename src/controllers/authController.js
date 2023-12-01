@@ -203,15 +203,18 @@ async function recoverUserByEmail(req, res) {
 			res.status(200).json({ message: "El usuario está suspendido" });
 		}
 
+		console.log(data.user_id);
 		//VERIFY IF A CODE EXISTS
 		const { data: dataCode, error: errorCode } = await supabase
 			.from("codes")
 			.select("*")
 			.eq("user_id", data.user_id)
 			.eq("type", "recover_password")
+			.order("created_at", { ascending: false })
+			.limit(1)
 			.single();
 
-		console.log(dataCode);
+		console.log(data, dataCode, fechaFormateada);
 
 		if (dataCode != null) {
 			if (dataCode.expires > fechaFormateada) {
