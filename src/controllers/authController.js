@@ -20,19 +20,31 @@ const nodemailer = require("nodemailer");
 
 const { supabase } = require("../configs/databaseConfig");
 
+// const transporter = nodemailer.createTransport({
+// 	name: "gmail",
+// 	service: "gmail",
+// 	secure: true,
+// 	host: "smtp.gmail.com",
+// 	port: 465,
+// 	auth: {
+// 		type: "OAuth2",
+// 		user: process.env.MAIL_USERNAME,
+// 		pass: process.env.MAIL_PASSWORD,
+// 		clientId: process.env.OAUTH_CLIENTID,
+// 		clientSecret: process.env.OAUTH_CLIENT_SECRET,
+// 		refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+// 	},
+// });
+
+// Configura el transporte de nodemailer con tus credenciales de Gmail
 const transporter = nodemailer.createTransport({
-	name: "gmail",
 	service: "gmail",
-	secure: true,
 	host: "smtp.gmail.com",
 	port: 465,
+	secure: true,
 	auth: {
-		type: "OAuth2",
-		user: process.env.MAIL_USERNAME,
-		pass: process.env.MAIL_PASSWORD,
-		clientId: process.env.OAUTH_CLIENTID,
-		clientSecret: process.env.OAUTH_CLIENT_SECRET,
-		refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+		user: "romainteractiva@gmail.com",
+		pass: "moqkwrtblblthnaw",
 	},
 });
 
