@@ -239,10 +239,32 @@ async function getEvents(req, res) {
 	}
 }
 
+async function getActivities(req, res) {
+	try {
+		const { data: activities, error: activitiesError } = await supabase
+			.from("groups")
+			.select("group_id, group_name, group_description, photo");
+
+		if (activitiesError) {
+			res.status(500).json({ error: activitiesError });
+			console.log(activitiesError);
+		} else {
+			console.log("Lista semilleros:", JSON.stringify(activities)); // Ver como cadena JSON en consola
+			console.log("Semilleros: " + activities);
+
+			res.status(200).json({ message: "sent", activities: activities });
+		}
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+		console.log("Error: " + error);
+	}
+}
+
 
 module.exports = {
 	makeEnrollment,
 	createNewActivity,
 	enrolledActivities,
 	getEvents,
+	getActivities
 };
