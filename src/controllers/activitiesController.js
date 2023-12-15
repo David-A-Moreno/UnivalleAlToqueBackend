@@ -218,9 +218,31 @@ async function enrolledActivities(req, res) {
 	}
 }
 
+async function getEvents(req, res) {
+	try {
+		const { data: events, error: eventsError } = await supabase
+			.from("events")
+			.select("event_id, event_name, photo");
+
+		if (eventsError) {
+			res.status(500).json({ error: eventsError });
+			console.log(eventsError);
+		} else {
+			console.log("Lista de eventos:", JSON.stringify(events)); // Ver como cadena JSON en consola
+			console.log("Events: " + events);
+
+			res.status(200).json({ message: "Events sent", events: events });
+		}
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+		console.log("Error: " + error);
+	}
+}
+
+
 module.exports = {
 	makeEnrollment,
 	createNewActivity,
 	enrolledActivities,
-
+	getEvents,
 };
