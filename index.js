@@ -15,9 +15,9 @@ const express = require("express");
 
 //IMPORTAR RUTAS
 const authRoutes = require("./src/routes/authRoutes");
-const userQuizRoutes = require("./src/routes/userQuizRoutes");
+const userQuizRoutes = require("./src/routes/activitiesRoutes");
 const updateProfileRoutes = require("./src/routes/updateProfileRoutes");
-const uploadRoutes = require("./src/routes/uploadRoutes");
+const activitiesRoutes = require("./src/routes/activitiesRoutes");
 const app = express();
 
 const { configureCORS } = require("./src/middlewares/corsMiddleware");
@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(configureCORS);
 app.use(authRoutes);
 app.use(updateProfileRoutes);
-// app.use(uploadRoutes);
+app.use(activitiesRoutes);
 
 // Iniciar el servidor
 app.listen(9000, () => {
