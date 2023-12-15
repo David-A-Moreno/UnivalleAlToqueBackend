@@ -4,6 +4,7 @@
 
 const { supabase } = require("../configs/databaseConfig");
 
+// REALIZAR INSCRIPCION DE UN USUARIO A UNA ACTIVIDAD (GRUPO O EVENTO)
 async function makeEnrollment(req, res) {
 	try {
 		const { user_id, activity_id, activity_type } = req.body;
@@ -148,15 +149,75 @@ async function createNewActivity(req, res) {
 			}
 		}
 
-
-		
-
 	} catch {
 
 	}
 }
 
+// OBTENER ACTIVIDADES INSCRITAS DE UN USUARIO
+async function enrolledActivities(req, res) {
+	try {
+		const { user_id } = req.body;
+
+		console.log("UserID: " + user_id);
+
+		//OBTENER ACTIVIDADES INSCRITAS
+		const { data: dataList, error: errorList } = await supabase
+			.from("enrollments")
+			.select("*")
+			.eq("user_id", user_id);
+
+		console.log("List: " + dataList);
+
+		const activities = [];
+
+		//OBTENER DATOS ADICIONALES DE CADA ACTIVIDAD INSCRITA
+		for (const enrollment of dataList) {
+			if (enrollment.activity_type == "group" && enrollment.group_id) {
+				const { data: groupData, error: groupError } = await supabase
+					.from("groups")
+					.select("*")
+					.eq("group_id", enrollment.group_id)
+					.single();
+
+				if (groupData) {
+					activities.push({
+						group_id: enrollment.group_id,
+						group_name: groupData.group_name,
+						group_description: groupData.group_description,
+						group_photo: groupData.photo,
+					});
+				}
+			} else if (enrollment.activity_type == "event" && enrollment.event_id) {
+				const { data: eventData, error: eventError } = await supabase
+					.from("events")
+					.select("*")
+					.eq("event_id", enrollment.event_id)
+					.single();
+
+				if (eventData) {
+					activities.push({
+						event_id: enrollment.event_id,
+						event_name: eventData.event_name,
+						event_description: eventData.event_description,
+						event_photo: eventData.photo,
+					});
+				}
+			}
+		}
+
+		console.log("Activities: " + activities);
+
+		res.status(200).json({ message: "Activities sent", activities: activities });
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+		console.log("Error: " + error);
+	}
+}
+
 module.exports = {
 	makeEnrollment,
-	createNewActivity
+	createNewActivity,
+	enrolledActivities,
+
 };
