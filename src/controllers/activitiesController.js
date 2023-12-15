@@ -112,13 +112,15 @@ async function createNewActivity(req, res) {
 						friday_start: friday_start,
 						friday_end: friday_end,
 						saturday_start: saturday_start,
-						saturday_end: saturday_end
-						
+						saturday_end: saturday_end,
+						photo: "https://movil.colombiaaprende.edu.co/sites/default/files/files_public/aprender_en_casa/Plazacirculo_amarillo.png"
 					},
 				]);
 			if (error) {
 				res.status(500).json({ error: error.message });
+				console.log(error)
 			}
+
 		}else if ( type_of_activity == "Evento"){
 			const { data, error } = await supabase
 				.from("events")
@@ -140,14 +142,15 @@ async function createNewActivity(req, res) {
 						friday_start: friday_start,
 						friday_end: friday_end,
 						saturday_start: saturday_start,
-						saturday_end: saturday_end
-						
+						saturday_end: saturday_end,
+						photo: "https://movil.colombiaaprende.edu.co/sites/default/files/files_public/aprender_en_casa/Plazacirculo_amarillo.png"
 					},
 				]);
 			if (error) {
 				res.status(500).json({ error: error.message });
 			}
 		}
+
 
 	} catch {
 
