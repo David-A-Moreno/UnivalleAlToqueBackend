@@ -65,6 +65,61 @@ async function makeEnrollment(req, res) {
 	}
 }
 
+async function createNewActivity(req, res) {
+	try {
+		const { 
+			type_of_activity,
+			event_name,
+			group_name,
+			event_description,
+			group_description,
+			available_slots,
+			slots,
+			creator_id,
+			monday_start,
+			monday_end,
+			tuesday_start,
+			tuesday_end,
+			wednesday_start,
+			wednesday_end,
+			thursday_start,
+			thursday_end,
+			friday_start,
+			friday_end,
+			saturday_start,
+			saturday_end
+		} = req.body;
+		console.log (req.body)
+		if ( type_of_activity == "Semillero"){
+			const { data, error } = await supabase
+				.from("groups")
+				.insert([
+					{
+						group_name: group_name,
+						group_description: group_description,
+						available_slots: available_slots,
+						slots: slots,
+						creator_id: creator_id
+						
+					},
+				]);
+
+			if (error) {
+				res.status(500).json({ error: error.message });
+			}
+		}else if ( type_of_activity == "Evento"){
+
+		}
+
+
+		
+
+	} catch {
+
+	}
+}
+
 module.exports = {
 	makeEnrollment,
+	createNewActivity
 };
