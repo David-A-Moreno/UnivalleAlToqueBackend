@@ -71,11 +71,15 @@ async function enrolledActivities(req, res) {
 	try {
 		const { user_id } = req.body;
 
+		console.log(user_id);
+
 		//OBTENER ACTIVIDADES INSCRITAS
 		const { data: dataList, error: errorList } = await supabase
 			.from("enrollments")
 			.select("*")
 			.eq("user_id", user_id);
+
+		console.log(dataList);
 
 		const activities = [];
 
@@ -113,6 +117,8 @@ async function enrolledActivities(req, res) {
 				}
 			}
 		}
+
+		console.log(activities);
 
 		res.status(200).json({ message: "Activities sent", activities: activities });
 	} catch (error) {
