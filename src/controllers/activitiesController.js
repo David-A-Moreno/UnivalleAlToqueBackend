@@ -68,7 +68,7 @@ async function makeEnrollment(req, res) {
 
 async function createNewActivity(req, res) {
 	try {
-		const { 
+		const {
 			type_of_activity,
 			event_name,
 			group_name,
@@ -88,70 +88,61 @@ async function createNewActivity(req, res) {
 			friday_start,
 			friday_end,
 			saturday_start,
-			saturday_end
+			saturday_end,
 		} = req.body;
-		console.log (req.body)
-		if ( type_of_activity == "Semillero"){
-			const { data, error } = await supabase
-				.from("groups")
-				.insert([
-					{
-						group_name: group_name,
-						group_description: group_description,
-						available_slots: available_slots,
-						slots: slots,
-						creator_id: creator_id,
-						monday_start: monday_start,
-						monday_end: monday_end,
-						tuesday_start: tuesday_start,
-						tuesday_end: tuesday_end,
-						wednesday_start: wednesday_start,
-						wednesday_end: wednesday_end,
-						thursday_start: thursday_start,
-						thursday_end: thursday_end,
-						friday_start: friday_start,
-						friday_end: friday_end,
-						saturday_start: saturday_start,
-						saturday_end: saturday_end
-						
-					},
-				]);
+		console.log(req.body);
+		if (type_of_activity == "Semillero") {
+			const { data, error } = await supabase.from("groups").insert([
+				{
+					group_name: group_name,
+					group_description: group_description,
+					available_slots: available_slots,
+					slots: slots,
+					creator_id: creator_id,
+					monday_start: monday_start,
+					monday_end: monday_end,
+					tuesday_start: tuesday_start,
+					tuesday_end: tuesday_end,
+					wednesday_start: wednesday_start,
+					wednesday_end: wednesday_end,
+					thursday_start: thursday_start,
+					thursday_end: thursday_end,
+					friday_start: friday_start,
+					friday_end: friday_end,
+					saturday_start: saturday_start,
+					saturday_end: saturday_end,
+				},
+			]);
 			if (error) {
 				res.status(500).json({ error: error.message });
 			}
-		}else if ( type_of_activity == "Evento"){
-			const { data, error } = await supabase
-				.from("events")
-				.insert([
-					{
-						event_name: event_name,
-						event_description: event_description,
-						available_slots: available_slots,
-						slots: slots,
-						creator_id: creator_id,
-						monday_start: monday_start,
-						monday_end: monday_end,
-						tuesday_start: tuesday_start,
-						tuesday_end: tuesday_end,
-						wednesday_start: wednesday_start,
-						wednesday_end: wednesday_end,
-						thursday_start: thursday_start,
-						thursday_end: thursday_end,
-						friday_start: friday_start,
-						friday_end: friday_end,
-						saturday_start: saturday_start,
-						saturday_end: saturday_end
-						
-					},
-				]);
+		} else if (type_of_activity == "Evento") {
+			const { data, error } = await supabase.from("events").insert([
+				{
+					event_name: event_name,
+					event_description: event_description,
+					available_slots: available_slots,
+					slots: slots,
+					creator_id: creator_id,
+					monday_start: monday_start,
+					monday_end: monday_end,
+					tuesday_start: tuesday_start,
+					tuesday_end: tuesday_end,
+					wednesday_start: wednesday_start,
+					wednesday_end: wednesday_end,
+					thursday_start: thursday_start,
+					thursday_end: thursday_end,
+					friday_start: friday_start,
+					friday_end: friday_end,
+					saturday_start: saturday_start,
+					saturday_end: saturday_end,
+				},
+			]);
 			if (error) {
 				res.status(500).json({ error: error.message });
 			}
 		}
-
-	} catch {
-
-	}
+	} catch {}
 }
 
 // OBTENER ACTIVIDADES INSCRITAS DE UN USUARIO
@@ -215,9 +206,30 @@ async function enrolledActivities(req, res) {
 	}
 }
 
+async function getEvents(req, res) {
+	try {
+		const { data: events, error: eventsError } = await supabase
+			.from("events")
+			.select("event_id, event_name, photo");
+
+		if (eventsError) {
+			res.status(500).json({ error: eventsError });
+			console.log(eventsError);
+		} else {
+			console.log("Lista de eventos:", JSON.stringify(events)); // Ver como cadena JSON en consola
+			console.log("Events: " + events);
+
+			res.status(200).json({ message: "Events sent", events: events });
+		}
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+		console.log("Error: " + error);
+	}
+}
+
 module.exports = {
 	makeEnrollment,
 	createNewActivity,
 	enrolledActivities,
-
+	getEvents,
 };
