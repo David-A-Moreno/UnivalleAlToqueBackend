@@ -346,6 +346,7 @@ async function getSemilleroById(req, res) {
             .select("*")
             .eq("user_id", user_id)
             .eq("group_id", semillero_id)
+            .eq("activity_type", "group")
             .single();
 
         // El usuario está inscrito si no hay error y hay datos en la respuesta
