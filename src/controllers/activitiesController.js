@@ -66,6 +66,97 @@ async function makeEnrollment(req, res) {
 	}
 }
 
+async function createNewActivity(req, res) {
+	try {
+		const { 
+			type_of_activity,
+			event_name,
+			group_name,
+			event_description,
+			group_description,
+			available_slots,
+			slots,
+			creator_id,
+			monday_start,
+			monday_end,
+			tuesday_start,
+			tuesday_end,
+			wednesday_start,
+			wednesday_end,
+			thursday_start,
+			thursday_end,
+			friday_start,
+			friday_end,
+			saturday_start,
+			saturday_end
+		} = req.body;
+		console.log (req.body)
+		if ( type_of_activity == "Semillero"){
+			const { data, error } = await supabase
+				.from("groups")
+				.insert([
+					{
+						group_name: group_name,
+						group_description: group_description,
+						available_slots: available_slots,
+						slots: slots,
+						creator_id: creator_id,
+						monday_start: monday_start,
+						monday_end: monday_end,
+						tuesday_start: tuesday_start,
+						tuesday_end: tuesday_end,
+						wednesday_start: wednesday_start,
+						wednesday_end: wednesday_end,
+						thursday_start: thursday_start,
+						thursday_end: thursday_end,
+						friday_start: friday_start,
+						friday_end: friday_end,
+						saturday_start: saturday_start,
+						saturday_end: saturday_end,
+						photo: "https://movil.colombiaaprende.edu.co/sites/default/files/files_public/aprender_en_casa/Plazacirculo_amarillo.png"
+					},
+				]);
+			if (error) {
+				res.status(500).json({ error: error.message });
+				console.log(error)
+			}
+
+		}else if ( type_of_activity == "Evento"){
+			const { data, error } = await supabase
+				.from("events")
+				.insert([
+					{
+						event_name: event_name,
+						event_description: event_description,
+						available_slots: available_slots,
+						slots: slots,
+						creator_id: creator_id,
+						monday_start: monday_start,
+						monday_end: monday_end,
+						tuesday_start: tuesday_start,
+						tuesday_end: tuesday_end,
+						wednesday_start: wednesday_start,
+						wednesday_end: wednesday_end,
+						thursday_start: thursday_start,
+						thursday_end: thursday_end,
+						friday_start: friday_start,
+						friday_end: friday_end,
+						saturday_start: saturday_start,
+						saturday_end: saturday_end,
+						photo: "https://movil.colombiaaprende.edu.co/sites/default/files/files_public/aprender_en_casa/Plazacirculo_amarillo.png"
+					},
+				]);
+			if (error) {
+				res.status(500).json({ error: error.message });
+			}
+		}
+
+
+	} catch {
+
+	}
+}
+
 // OBTENER ACTIVIDADES INSCRITAS DE UN USUARIO
 async function enrolledActivities(req, res) {
 	try {
@@ -182,6 +273,29 @@ async function enrolledActivities(req, res) {
 		console.log("Activities: " + activities);
 
 		res.status(200).json({ message: "Activities sent", activities: activities });
+
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+		console.log("Error: " + error);
+	}
+}
+
+async function getEvents(req, res) {
+	try {
+		const { data: events, error: eventsError } = await supabase
+			.from("events")
+			.select("event_id, event_name, photo");
+
+		if (eventsError) {
+			res.status(500).json({ error: eventsError });
+			console.log(eventsError);
+		} else {
+			console.log("Lista de eventos:", JSON.stringify(events)); // Ver como cadena JSON en consola
+			console.log("Events: " + events);
+
+			res.status(200).json({ message: "Events sent", events: events });
+		}
+
 	} catch (error) {
 		res.status(500).json({ error: `${error}` });
 		console.log("Error: " + error);
@@ -273,8 +387,33 @@ async function getSemilleroById(req, res) {
     }
 }
 
+async function getActivities(req, res) {
+	try {
+		const { data: activities, error: activitiesError } = await supabase
+			.from("groups")
+			.select("group_id, group_name, group_description, photo");
+
+		if (activitiesError) {
+			res.status(500).json({ error: activitiesError });
+			console.log(activitiesError);
+		} else {
+			console.log("Lista semilleros:", JSON.stringify(activities)); // Ver como cadena JSON en consola
+			console.log("Semilleros: " + activities);
+
+			res.status(200).json({ message: "sent", activities: activities });
+		}
+	} catch (error) {
+		res.status(500).json({ error: `${error}` });
+		console.log("Error: " + error);
+	}
+}
+
+
 module.exports = {
 	makeEnrollment,
+	createNewActivity,
 	enrolledActivities,
-	getSemilleroById
+	getSemilleroById,
+	getEvents,
+	getActivities
 };
