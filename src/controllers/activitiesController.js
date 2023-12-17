@@ -240,8 +240,7 @@ async function getSemilleroById(req, res) {
 
 		console.log(isUserEnrolled)
 
-        // Enviar la respuesta con la información del semillero y si el usuario está inscrito
-        res.status(200).json({
+		const semilleroInfoArray = [
             group_name,
             group_description,
             slots,
@@ -260,6 +259,12 @@ async function getSemilleroById(req, res) {
             saturday_end,
             photo,
             place,
+        ];
+
+        // Enviar la respuesta con la información del semillero y si el usuario está inscrito
+        res.status(200).json({
+            message: "Semillero Sent",
+            semilleroInfoArray,
             isUserEnrolled,
         });
     } catch (error) {
@@ -268,8 +273,8 @@ async function getSemilleroById(req, res) {
     }
 }
 
-
 module.exports = {
 	makeEnrollment,
 	enrolledActivities,
+	getSemilleroById
 };
