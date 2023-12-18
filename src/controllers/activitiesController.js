@@ -304,7 +304,8 @@ async function getEvents(req, res) {
 
 async function getSemilleroById(req, res) {
     try {
-        const { semillero_id, user_id } = req.body;
+        const semillero_id = req.query.semillero_id;
+		const user_id = req.query.user_id;
 
         // Buscar si el semillero existe
         const { data: semilleroData, error: semilleroError } = await supabase
