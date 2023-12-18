@@ -354,7 +354,7 @@ async function getSemilleroById(req, res) {
 
 		console.log(isUserEnrolled)
 
-		const semilleroInfoArray = {
+		const semilleroInfoArray = [
             group_name,
             group_description,
             slots,
@@ -373,7 +373,7 @@ async function getSemilleroById(req, res) {
             saturday_end,
             photo,
             place,
-        };
+        ];
 
         // Enviar la respuesta con la información del semillero y si el usuario está inscrito
         res.status(200).json({
