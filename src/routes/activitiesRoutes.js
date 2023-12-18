@@ -12,7 +12,7 @@ const {
 
 router.post("/activity/enroll", makeEnrollment);
 router.post("/activity/list", enrolledActivities);
-router.get("/activity/semillero", getSemilleroById)
+router.post("/activity/semillero", getSemilleroById)
 router.post("/createnewactivity", createNewActivity);
 router.get("/events", getEvents);
 router.get("/activities", getActivities);
