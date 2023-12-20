@@ -387,6 +387,91 @@ async function getSemilleroById(req, res) {
     }
 }
 
+async function getEventById(req, res) {
+    try {
+        const { event_id, user_id } = req.body;
+
+        // Buscar si el semillero existe
+        const { data: eventData, error: eventError } = await supabase
+            .from("events")
+            .select("*")
+            .eq("event_id", event_id)
+            .single();
+
+        // Si el semillero no existe
+        if (eventError) {
+            throw new Error("Event does not exist");
+        }
+
+        // Obtener la información del semillero
+        const {
+            event_name,
+            event_description,
+            slots,
+            available_slots,
+            monday_start,
+            monday_end,
+            tuesday_start,
+            tuesday_end,
+            wednesday_start,
+            wednesday_end,
+            thursday_start,
+            thursday_end,
+            friday_start,
+            friday_end,
+            saturday_start,
+            saturday_end,
+            photo,
+            place,
+        } = eventData;
+
+        // Verificar si el usuario está inscrito en el semillero
+        const { data: enrollmentData, error: enrollmentError } = await supabase
+            .from("enrollments")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("group_id", event_id)
+            .eq("activity_type", "event")
+            .single();
+
+        // El usuario está inscrito si no hay error y hay datos en la respuesta
+        const isUserEnrolled = !enrollmentError && enrollmentData;
+
+		console.log(isUserEnrolled)
+
+		const eventInfoArray = [{
+            event_name,
+            event_description,
+            slots,
+            available_slots,
+            monday_start,
+            monday_end,
+            tuesday_start,
+            tuesday_end,
+            wednesday_start,
+            wednesday_end,
+            thursday_start,
+            thursday_end,
+            friday_start,
+            friday_end,
+            saturday_start,
+            saturday_end,
+            photo,
+            place,
+        }];
+
+        // Enviar la respuesta con la información del semillero y si el usuario está inscrito
+        res.status(200).json({
+            message: "event Sent",
+            eventInfoArray,
+            isUserEnrolled,
+        });
+    } catch (error) {
+        console.error("Error: " + `${error}`);
+        res.status(500).json({ error: `${error}` });
+    }
+}
+
 async function getActivities(req, res) {
 	try {
 		const { data: activities, error: activitiesError } = await supabase
