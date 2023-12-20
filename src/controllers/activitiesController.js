@@ -280,7 +280,9 @@ async function getSemilleroById(req, res) {
 			.single();
 
 		// El usuario está inscrito si no hay error y hay datos en la respuesta
-		const isUserEnrolled = !enrollmentError && enrollmentData;
+		const isUserEnrolled = !enrollmentError && enrollmentData != null;
+
+		console.log(isUserEnrolled);
 
 		const semilleroInfoArray = [
 			{
@@ -365,7 +367,7 @@ async function getEventById(req, res) {
 			.single();
 
 		// El usuario está inscrito si no hay error y hay datos en la respuesta
-		const isUserEnrolled = !enrollmentError && enrollmentData;
+		const isUserEnrolled = !enrollmentError && enrollmentData != null;
 
 		const eventInfoArray = [
 			{
