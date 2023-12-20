@@ -432,4 +432,5 @@ module.exports = {
 	getSemilleroById,
 	getEvents,
 	getActivities,
+	getEventById
 };
