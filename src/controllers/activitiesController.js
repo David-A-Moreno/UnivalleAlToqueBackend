@@ -40,7 +40,7 @@ async function makeEnrollment(req, res) {
 
 				res.status(200).json({ message: "Successfully enrolled" });
 			} else {
-				res.status(500).json({ error: "There are no free slots" });
+				res.status(500).json({ message: "There are no free slots" });
 			}
 		} else if (activity_type == "event") {
 			const { data: newEnrollment, error: errorNewEnrollment } = await supabase
@@ -54,12 +54,12 @@ async function makeEnrollment(req, res) {
 				]);
 
 			if (errorNewEnrollment) {
-				res.status(500).json({ error: errorNewEnrollment.message });
+				res.status(500).json({ message: errorNewEnrollment.message });
 			}
 
 			res.status(200).json({ message: "Successfully enrolled" });
 		} else {
-			res.status(500).json({ error: "Activity type not provided" });
+			res.status(500).json({ message: "Activity type not provided" });
 		}
 	} catch (error) {
 		res.status(500).json({ error: `${error}` });
