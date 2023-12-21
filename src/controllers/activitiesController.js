@@ -43,7 +43,7 @@ async function makeEnrollment(req, res) {
 
 				const { data: updateSlots, error: errorUpdateSlots } = await supabase
 					.from("groups")
-					.update({ available_slots: newSlots - 1 }) // Resta 1 al valor actual
+					.update({ available_slots: newSlots }) // Resta 1 al valor actual
 					.eq("group_id", activity_id);
 
 
