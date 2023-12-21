@@ -132,22 +132,12 @@ async function cancelEnrollment(req, res) {
 		.eq("activity_type", activity_type)
 		.single();
   
-	  if (!enrollmentData) {
-		res.status(500).json({ message: "Enrollment not found" });
-		return;
-	  }
-  
 	  // Obtener información de la actividad
 	  const { data: activityData, error: errorActivity } = await supabase
 		.from(activityTable)
 		.select("*")
 		.eq(enrollmentColumn, activity_id)
 		.single();
-  
-	  if (!activityData) {
-		res.status(500).json({ message: "Activity not found" });
-		return;
-	  }
   
 	  // Actualizar cupos disponibles
 	  const updatedSlots = activityData[activityColumn] + 1;
