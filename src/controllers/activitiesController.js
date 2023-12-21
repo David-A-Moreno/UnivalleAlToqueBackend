@@ -73,18 +73,19 @@ async function makeEnrollment(req, res) {
 
 			if (available_slots > 0) {
 				const { data: newEnrollment, error: errorNewEnrollment } = await supabase
-				.from("enrollments")
-				.insert([
-					{
-						user_id: user_id,
-						event_id: activity_id,
-						activity_type: "event",
-					},
-				]);
+					.from("enrollments")
+					.insert([
+						{
+							user_id: user_id,
+							group_id: activity_id,
+							activity_type: "event",
+						},
+					]);
+
 
 				const { data: updateSlots, error: errorUpdateSlots } = await supabase
 					.from("events")
-					.update({ available_slots: newSlots -1 }) // Resta 1 al valor actual
+					.update({ available_slots: newSlots }) // Resta 1 al valor actual
 					.eq("event_id", activity_id);
 
 
