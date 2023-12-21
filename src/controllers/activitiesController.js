@@ -38,6 +38,13 @@ async function makeEnrollment(req, res) {
 						},
 					]);
 
+
+				const { data: updateSlots, error: errorUpdateSlots } = await supabase
+					.from("groups")
+					.update({ available_slots: slots_taken + 1 }) // Resta 1 al valor actual
+					.eq("group_id", activity_id);
+
+
 				res.status(200).json({ message: "Successfully enrolled" });
 			} else {
 				res.status(500).json({ message: "There are no free slots" });
@@ -52,6 +59,11 @@ async function makeEnrollment(req, res) {
 						activity_type: "event",
 					},
 				]);
+
+			const { data: updateSlots, error: errorUpdateSlots } = await supabase
+				.from("events")
+				.update({ available_slots: slots_taken + 1 }) // Resta 1 al valor actual
+				.eq("event_id", activity_id);
 
 			if (errorNewEnrollment) {
 				res.status(500).json({ message: errorNewEnrollment.message });
@@ -147,7 +159,7 @@ async function createNewActivity(req, res) {
 				res.status(500).json({ error: error.message });
 			}
 		}
-	} catch {}
+	} catch { }
 }
 
 // OBTENER ACTIVIDADES INSCRITAS DE UN USUARIO
