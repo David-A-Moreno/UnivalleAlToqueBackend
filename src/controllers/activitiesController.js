@@ -40,11 +40,6 @@ async function makeEnrollment(req, res) {
 						},
 					]);
 
-				const { data: updateSlots, error: errorUpdateSlots } = await supabase
-					.from("groups")
-					.update({ available_slots: newSlots - 1 }) // Resta 1 al valor actual
-					.eq("group_id", activity_id);
-
 				res.status(200).json({ message: "Successfully enrolled" });
 			} else {
 				res.status(500).json({ message: "There are no free slots" });
@@ -78,11 +73,6 @@ async function makeEnrollment(req, res) {
 							activity_type: "event",
 						},
 					]);
-
-				const { data: updateSlots, error: errorUpdateSlots } = await supabase
-					.from("events")
-					.update({ available_slots: newSlots - 1 }) // Resta 1 al valor actual
-					.eq("event_id", activity_id);
 
 				res.status(200).json({ message: "Successfully enrolled" });
 			} else {
@@ -381,6 +371,14 @@ async function getSemilleroById(req, res) {
 
 		console.log(isUserEnrolled);
 
+		const { data: enrollmentsData, error: errorEnrollments } = await supabase
+			.from("enrollments")
+			.select("count", { count: "exact" })
+			.eq("group_id", semillero_id);
+
+		const slots_taken = enrollmentsData[0].count;
+		console.log(slots_taken);
+
 		const semilleroInfoArray = [
 			{
 				group_name,
@@ -401,6 +399,7 @@ async function getSemilleroById(req, res) {
 				saturday_end,
 				photo,
 				place,
+				slots_taken,
 			},
 		];
 
@@ -466,6 +465,14 @@ async function getEventById(req, res) {
 		// El usuario está inscrito si no hay error y hay datos en la respuesta
 		const isUserEnrolled = !enrollmentError && enrollmentData != null;
 
+		const { data: enrollmentsData, error: errorEnrollments } = await supabase
+			.from("enrollments")
+			.select("count", { count: "exact" })
+			.eq("event_id", event_id);
+
+		const slots_taken = enrollmentsData[0].count;
+		console.log(slots_taken);
+
 		const eventInfoArray = [
 			{
 				event_name,
@@ -486,6 +493,7 @@ async function getEventById(req, res) {
 				saturday_end,
 				photo,
 				place,
+				slots_taken,
 			},
 		];
 
