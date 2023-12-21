@@ -52,7 +52,27 @@ async function makeEnrollment(req, res) {
 				res.status(500).json({ message: "There are no free slots" });
 			}
 		} else if (activity_type == "event") {
-			const { data: newEnrollment, error: errorNewEnrollment } = await supabase
+
+			const { data: groupData, error: errorData } = await supabase
+				.from("events")
+				.select("*")
+				.eq("event_id", activity_id)
+				.single();
+
+			const slots = groupData.slots;
+
+			const newSlots = groupData.available_slots
+
+			const { data: enrollmentsData, error: errorEnrollments } = await supabase
+				.from("enrollments")
+				.select("count", { count: "exact" })
+				.eq("event_id", activity_id);
+
+			const slots_taken = enrollmentsData[0].count;
+			const available_slots = slots - slots_taken;
+
+			if (available_slots > 0) {
+				const { data: newEnrollment, error: errorNewEnrollment } = await supabase
 				.from("enrollments")
 				.insert([
 					{
@@ -62,11 +82,17 @@ async function makeEnrollment(req, res) {
 					},
 				]);
 
-			if (errorNewEnrollment) {
-				res.status(500).json({ message: errorNewEnrollment.message });
+				const { data: updateSlots, error: errorUpdateSlots } = await supabase
+					.from("events")
+					.update({ available_slots: newSlots }) // Resta 1 al valor actual
+					.eq("event_id", activity_id);
+
+
+				res.status(200).json({ message: "Successfully enrolled" });
+			} else {
+				res.status(500).json({ message: "There are no free slots" });
 			}
 
-			res.status(200).json({ message: "Successfully enrolled" });
 		} else {
 			res.status(500).json({ message: "Activity type not provided" });
 		}
