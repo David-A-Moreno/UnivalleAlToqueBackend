@@ -102,6 +102,73 @@ async function makeEnrollment(req, res) {
 	}
 }
 
+async function cancelEnrollment(req, res) {
+	try {
+	  const { user_id, activity_id, activity_type } = req.body;
+  
+	  let activityTable;
+	  let enrollmentColumn;
+	  let activityColumn;
+  
+	  if (activity_type === "group") {
+		activityTable = "groups";
+		enrollmentColumn = "group_id";
+		activityColumn = "available_slots";
+	  } else if (activity_type === "event") {
+		activityTable = "events";
+		enrollmentColumn = "event_id";
+		activityColumn = "available_slots";
+	  } else {
+		res.status(500).json({ message: "Invalid activity type" });
+		return;
+	  }
+  
+	  // Obtener información de la inscripción
+	  const { data: enrollmentData, error: errorEnrollment } = await supabase
+		.from("enrollments")
+		.delete()
+		.eq("user_id", user_id)
+		.eq(enrollmentColumn, activity_id)
+		.eq("activity_type", activity_type)
+		.single();
+  
+	  if (!enrollmentData) {
+		res.status(500).json({ message: "Enrollment not found" });
+		return;
+	  }
+  
+	  // Obtener información de la actividad
+	  const { data: activityData, error: errorActivity } = await supabase
+		.from(activityTable)
+		.select("*")
+		.eq(enrollmentColumn, activity_id)
+		.single();
+  
+	  if (!activityData) {
+		res.status(500).json({ message: "Activity not found" });
+		return;
+	  }
+  
+	  // Actualizar cupos disponibles
+	  const updatedSlots = activityData[activityColumn] + 1;
+  
+	  const { data: updateActivity, error: errorUpdateActivity } = await supabase
+		.from(activityTable)
+		.update({ [activityColumn]: updatedSlots })
+		.eq(enrollmentColumn, activity_id);
+  
+	  if (errorUpdateActivity) {
+		res.status(500).json({ message: "Failed to update activity slots" });
+		return;
+	  }
+  
+	  res.status(200).json({ message: "Enrollment canceled successfully" });
+	} catch (error) {
+	  res.status(500).json({ error: `${error}` });
+	}
+  }
+  
+
 async function createNewActivity(req, res) {
 	try {
 		const {
@@ -469,4 +536,5 @@ module.exports = {
 	getEvents,
 	getActivities,
 	getEventById,
+	cancelEnrollment
 };

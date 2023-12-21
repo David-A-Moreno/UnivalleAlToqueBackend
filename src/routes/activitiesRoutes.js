@@ -8,10 +8,12 @@ const {
 	getEvents,
 	getSemilleroById,
     getActivities,
-	getEventById
+	getEventById,
+	cancelEnrollment
 } = require("../controllers/activitiesController");
 
 router.post("/activity/enroll", makeEnrollment);
+router.post("/activity/cance-enrroll", cancelEnrollment);
 router.post("/activity/list", enrolledActivities);
 router.post("/activity/semillero", getSemilleroById);
 router.post("/activity/event", getEventById)
