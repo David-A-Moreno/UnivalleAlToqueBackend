@@ -19,7 +19,7 @@ async function makeEnrollment(req, res) {
 
 			const slots = groupData.slots;
 
-			const newSlots = groupData.available_slots
+			const newSlots = groupData.available_slots;
 
 			const { data: enrollmentsData, error: errorEnrollments } = await supabase
 				.from("enrollments")
@@ -40,19 +40,16 @@ async function makeEnrollment(req, res) {
 						},
 					]);
 
-
 				const { data: updateSlots, error: errorUpdateSlots } = await supabase
 					.from("groups")
 					.update({ available_slots: newSlots - 1 }) // Resta 1 al valor actual
 					.eq("group_id", activity_id);
-
 
 				res.status(200).json({ message: "Successfully enrolled" });
 			} else {
 				res.status(500).json({ message: "There are no free slots" });
 			}
 		} else if (activity_type == "event") {
-
 			const { data: groupData, error: errorData } = await supabase
 				.from("events")
 				.select("*")
@@ -61,7 +58,7 @@ async function makeEnrollment(req, res) {
 
 			const slots = groupData.slots;
 
-			const newSlots = groupData.available_slots
+			const newSlots = groupData.available_slots;
 
 			const { data: enrollmentsData, error: errorEnrollments } = await supabase
 				.from("enrollments")
@@ -82,18 +79,15 @@ async function makeEnrollment(req, res) {
 						},
 					]);
 
-
 				const { data: updateSlots, error: errorUpdateSlots } = await supabase
 					.from("events")
-					.update({ available_slots: newSlots - 1}) // Resta 1 al valor actual
+					.update({ available_slots: newSlots - 1 }) // Resta 1 al valor actual
 					.eq("event_id", activity_id);
-
 
 				res.status(200).json({ message: "Successfully enrolled" });
 			} else {
 				res.status(500).json({ message: "There are no free slots" });
 			}
-
 		} else {
 			res.status(500).json({ message: "Activity type not provided" });
 		}
@@ -104,60 +98,59 @@ async function makeEnrollment(req, res) {
 
 async function cancelEnrollment(req, res) {
 	try {
-	  const { user_id, activity_id, activity_type } = req.body;
-  
-	  let activityTable;
-	  let enrollmentColumn;
-	  let activityColumn;
-  
-	  if (activity_type === "group") {
-		activityTable = "groups";
-		enrollmentColumn = "group_id";
-		activityColumn = "available_slots";
-	  } else if (activity_type === "event") {
-		activityTable = "events";
-		enrollmentColumn = "event_id";
-		activityColumn = "available_slots";
-	  } else {
-		res.status(500).json({ message: "Invalid activity type" });
-		return;
-	  }
-  
-	  // Obtener información de la inscripción
-	  const { data: enrollmentData, error: errorEnrollment } = await supabase
-		.from("enrollments")
-		.delete()
-		.eq("user_id", user_id)
-		.eq(enrollmentColumn, activity_id)
-		.eq("activity_type", activity_type)
-		.single();
-  
-	  // Obtener información de la actividad
-	  const { data: activityData, error: errorActivity } = await supabase
-		.from(activityTable)
-		.select("*")
-		.eq(enrollmentColumn, activity_id)
-		.single();
-  
-	  // Actualizar cupos disponibles
-	  const updatedSlots = activityData[activityColumn] + 1;
-  
-	  const { data: updateActivity, error: errorUpdateActivity } = await supabase
-		.from(activityTable)
-		.update({ [activityColumn]: updatedSlots })
-		.eq(enrollmentColumn, activity_id);
-  
-	  if (errorUpdateActivity) {
-		res.status(500).json({ message: "Failed to update activity slots" });
-		return;
-	  }
-  
-	  res.status(200).json({ message: "Enrollment canceled successfully" });
+		const { user_id, activity_id, activity_type } = req.body;
+
+		let activityTable;
+		let enrollmentColumn;
+		let activityColumn;
+
+		if (activity_type === "group") {
+			activityTable = "groups";
+			enrollmentColumn = "group_id";
+			activityColumn = "available_slots";
+		} else if (activity_type === "event") {
+			activityTable = "events";
+			enrollmentColumn = "event_id";
+			activityColumn = "available_slots";
+		} else {
+			res.status(500).json({ message: "Invalid activity type" });
+			return;
+		}
+
+		// Obtener información de la inscripción
+		const { data: enrollmentData, error: errorEnrollment } = await supabase
+			.from("enrollments")
+			.delete()
+			.eq("user_id", user_id)
+			.eq(enrollmentColumn, activity_id)
+			.eq("activity_type", activity_type)
+			.single();
+
+		// Obtener información de la actividad
+		const { data: activityData, error: errorActivity } = await supabase
+			.from(activityTable)
+			.select("*")
+			.eq(enrollmentColumn, activity_id)
+			.single();
+
+		// Actualizar cupos disponibles
+		const updatedSlots = activityData[activityColumn] + 1;
+
+		const { data: updateActivity, error: errorUpdateActivity } = await supabase
+			.from(activityTable)
+			.update({ [activityColumn]: updatedSlots })
+			.eq(enrollmentColumn, activity_id);
+
+		if (errorUpdateActivity) {
+			res.status(500).json({ message: "Failed to update activity slots" });
+			return;
+		}
+
+		res.status(200).json({ message: "Enrollment canceled successfully" });
 	} catch (error) {
-	  res.status(500).json({ error: `${error}` });
+		res.status(500).json({ error: `${error}` });
 	}
-  }
-  
+}
 
 async function createNewActivity(req, res) {
 	try {
@@ -182,8 +175,11 @@ async function createNewActivity(req, res) {
 			friday_end,
 			saturday_start,
 			saturday_end,
+			photo,
 		} = req.body;
+
 		console.log(req.body);
+
 		if (type_of_activity == "Semillero") {
 			const { data, error } = await supabase.from("groups").insert([
 				{
@@ -204,14 +200,15 @@ async function createNewActivity(req, res) {
 					friday_end: friday_end,
 					saturday_start: saturday_start,
 					saturday_end: saturday_end,
-					photo:
-						"https://movil.colombiaaprende.edu.co/sites/default/files/files_public/aprender_en_casa/Plazacirculo_amarillo.png",
+					photo: photo,
 				},
 			]);
 			if (error) {
 				res.status(500).json({ error: error.message });
 				console.log(error);
 			}
+
+			res.status(200).json({ message: "OK" });
 		} else if (type_of_activity == "Evento") {
 			const { data, error } = await supabase.from("events").insert([
 				{
@@ -232,15 +229,19 @@ async function createNewActivity(req, res) {
 					friday_end: friday_end,
 					saturday_start: saturday_start,
 					saturday_end: saturday_end,
-					photo:
-						"https://movil.colombiaaprende.edu.co/sites/default/files/files_public/aprender_en_casa/Plazacirculo_amarillo.png",
+					photo: photo,
 				},
 			]);
 			if (error) {
 				res.status(500).json({ error: error.message });
 			}
+
+			res.status(200).json({ message: "OK" });
 		}
-	} catch { }
+	} catch (error) {
+		console.error("Error: " + `${error}`);
+		res.status(500).json({ error: `${error}` });
+	}
 }
 
 // OBTENER ACTIVIDADES INSCRITAS DE UN USUARIO
@@ -526,5 +527,5 @@ module.exports = {
 	getEvents,
 	getActivities,
 	getEventById,
-	cancelEnrollment
+	cancelEnrollment,
 };
