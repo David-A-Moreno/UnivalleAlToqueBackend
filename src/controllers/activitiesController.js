@@ -19,6 +19,8 @@ async function makeEnrollment(req, res) {
 
 			const slots = groupData.slots;
 
+			const newSlots = groupData.available_slots
+
 			const { data: enrollmentsData, error: errorEnrollments } = await supabase
 				.from("enrollments")
 				.select("count", { count: "exact" })
@@ -41,7 +43,7 @@ async function makeEnrollment(req, res) {
 
 				const { data: updateSlots, error: errorUpdateSlots } = await supabase
 					.from("groups")
-					.update({ available_slots: available_slots - 1 }) // Resta 1 al valor actual
+					.update({ available_slots: newSlots - 1 }) // Resta 1 al valor actual
 					.eq("group_id", activity_id);
 
 
