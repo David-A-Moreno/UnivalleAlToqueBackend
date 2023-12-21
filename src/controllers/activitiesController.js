@@ -77,7 +77,7 @@ async function makeEnrollment(req, res) {
 					.insert([
 						{
 							user_id: user_id,
-							group_id: activity_id,
+							event_id: activity_id,
 							activity_type: "event",
 						},
 					]);
