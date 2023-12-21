@@ -62,21 +62,6 @@ async function makeEnrollment(req, res) {
 					},
 				]);
 
-			const slots = groupData.slots;
-
-			const { data: enrollmentsData, error: errorEnrollments } = await supabase
-				.from("enrollments")
-				.select("count", { count: "exact" })
-				.eq("event_id", activity_id);
-
-			const slots_taken = enrollmentsData[0].count;
-			const available_slots = slots - slots_taken;
-
-			const { data: updateSlots, error: errorUpdateSlots } = await supabase
-				.from("events")
-				.update({ available_slots: available_slots - 1 }) // Resta 1 al valor actual
-				.eq("event_id", activity_id);
-
 			if (errorNewEnrollment) {
 				res.status(500).json({ message: errorNewEnrollment.message });
 			}
