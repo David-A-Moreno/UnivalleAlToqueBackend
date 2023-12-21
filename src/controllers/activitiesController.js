@@ -176,6 +176,7 @@ async function createNewActivity(req, res) {
 			saturday_start,
 			saturday_end,
 			photo,
+			place,
 		} = req.body;
 
 		console.log(req.body);
@@ -201,6 +202,7 @@ async function createNewActivity(req, res) {
 					saturday_start: saturday_start,
 					saturday_end: saturday_end,
 					photo: photo,
+					place: place,
 				},
 			]);
 			if (error) {
@@ -230,6 +232,7 @@ async function createNewActivity(req, res) {
 					saturday_start: saturday_start,
 					saturday_end: saturday_end,
 					photo: photo,
+					place: place,
 				},
 			]);
 			if (error) {
